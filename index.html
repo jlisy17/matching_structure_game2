@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>建築結構配對工作紙 (3×3)</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Microsoft JhengHei','PingFang TC','Noto Sans TC',sans-serif;min-height:100vh}
@@ -20,6 +25,7 @@ body{font-family:'Microsoft JhengHei','PingFang TC','Noto Sans TC',sans-serif;mi
 #pwToggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;user-select:none;color:#888}
 .login-card .lbtn{margin-top:16px;width:100%;padding:13px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;font-family:inherit;transition:.2s}
 .login-card .lbtn:hover{opacity:.9;transform:translateY(-2px)}
+.login-card .lbtn:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .login-err{color:#e53935;font-size:.85rem;margin-top:10px;min-height:1.3em}
 
 /* QUIZ */
@@ -52,6 +58,7 @@ h1{text-align:center;font-size:clamp(1.1rem,4vw,1.7rem);color:#333;margin:4px 0}
 .btns{text-align:center;margin:14px 0}
 .btns button{padding:9px 20px;margin:4px;border:none;border-radius:10px;font-size:clamp(.78rem,2.4vw,1rem);cursor:pointer;font-family:inherit;color:#fff;font-weight:bold;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .btns button:hover{opacity:.85;transform:translateY(-2px)}
+.btns button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .bc{background:#43a047}.br{background:#ef6c00}.ba{background:#1565c0}.bp{background:#546e7a}
 #score{text-align:center;font-size:clamp(.88rem,2.8vw,1.15rem);font-weight:bold;color:#333;margin:8px 0;min-height:1.6em}
 .tip{text-align:center;font-size:clamp(.62rem,1.8vw,.8rem);color:#888;margin-top:6px;line-height:1.5}
@@ -89,6 +96,8 @@ h1{text-align:center;font-size:clamp(1.1rem,4vw,1.7rem);color:#333;margin:4px 0}
 .reset-btn:hover{opacity:.85;transform:translateY(-1px)}
 .answer-btn{padding:6px 16px;background:linear-gradient(135deg,#43a047,#2e7d32);color:#fff;border:none;border-radius:8px;font-size:clamp(.68rem,1.8vw,.82rem);cursor:pointer;font-family:inherit;font-weight:bold;transition:.2s}
 .answer-btn:hover{opacity:.85;transform:translateY(-1px)}
+.refresh-btn{padding:6px 16px;background:linear-gradient(135deg,#1e88e5,#1565c0);color:#fff;border:none;border-radius:8px;font-size:clamp(.68rem,1.8vw,.82rem);cursor:pointer;font-family:inherit;font-weight:bold;transition:.2s}
+.refresh-btn:hover{opacity:.85;transform:translateY(-1px)}
 .stats-row{display:flex;gap:10px;max-width:900px;margin:0 auto 14px;flex-wrap:wrap}
 .stat-card{flex:1;min-width:100px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 10px;text-align:center}
 .stat-card .num{font-size:clamp(1.3rem,4vw,2rem);font-weight:900;color:#64b5f6}
@@ -119,6 +128,11 @@ tr:hover td{background:rgba(255,255,255,.04)}
 .td-score{font-weight:900;color:#ffd54f}
 .tfoot td{background:rgba(255,255,255,.08);font-weight:700;color:#ef5350;border-top:2px solid rgba(255,255,255,.15)}
 .empty-msg{text-align:center;color:#999;padding:30px 10px;font-size:clamp(.85rem,2.5vw,1.1rem)}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:#aaa;font-size:clamp(.85rem,2.5vw,1rem)}
+.loading::after{content:'';display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.15);border-top-color:#64b5f6;border-radius:50%;animation:spin .8s linear infinite;margin-left:10px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -133,7 +147,7 @@ tr:hover td{background:rgba(255,255,255,.04)}
 <input type="password" id="pwInput" placeholder="請輸入管理員密碼">
 <span id="pwToggle" onclick="togglePw()">👁️</span>
 </div>
-<button class="lbtn" onclick="login()">進入 →</button>
+<button class="lbtn" id="loginBtn" onclick="login()">進入 →</button>
 <div class="login-err" id="loginErr"></div>
 </div>
 </div>
@@ -153,7 +167,7 @@ tr:hover td{background:rgba(255,255,255,.04)}
 </div>
 <div class="wrap"><div id="grid" class="grid"></div></div>
 <div class="btns" id="quizBtns">
-<button class="ba" onclick="submitAnswers()">📤 提交答案</button>
+<button class="ba" id="submitBtn" onclick="submitAnswers()">📤 提交答案</button>
 <button class="br" onclick="rstQuiz()">🔄 重置</button>
 </div>
 <div id="score"></div>
@@ -178,6 +192,7 @@ tr:hover td{background:rgba(255,255,255,.04)}
 <div class="admin-topbar">
 <h1>📊 管理員面板</h1>
 <div class="admin-topbar-btns">
+<button class="refresh-btn" onclick="renderAdmin()">🔄 重新整理</button>
 <button class="answer-btn" onclick="showAnswerKey()">📖 顯示正確答案</button>
 <button class="reset-btn" onclick="confirmReset()">🗑️ 重設所有記錄</button>
 <button class="logout-btn" onclick="logout()">登出</button>
@@ -189,6 +204,21 @@ tr:hover td{background:rgba(255,255,255,.04)}
 </div>
 
 <script>
+// ============================================
+// 🔥 Firebase 設定
+// ============================================
+var firebaseConfig = {
+  apiKey: "AIzaSyAsQUIoY_aV-vVuQbrB6hzhdFnz0bT8vBU",
+  authDomain: "matching-structure.firebaseapp.com",
+  projectId: "matching-structure",
+  storageBucket: "matching-structure.firebasestorage.app",
+  messagingSenderId: "935853755870",
+  appId: "1:935853755870:web:a9cebeb3fc1f6855b1a14f"
+};
+
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+
 // ===== CONFIG =====
 var ADMIN_NAME='lsy';
 var ADMIN_PW='lsy617';
@@ -204,22 +234,35 @@ var tagEmoji={mass:'🔴',frame:'🔵',shell:'🟢'};
 var tagCls={mass:'am',frame:'af',shell:'as'};
 var itemOrder=['水壩','金字塔','城堡','電塔','鞦韆架','摩天輪','隧道','飛機','雨傘'];
 
-// ===== SUBMISSIONS STORAGE =====
-var submissions=[
-  {name:'陳小明',answers:{'水壩':'mass','金字塔':'mass','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'shell','雨傘':'frame'},score:8,time:Date.now()-50000},
-  {name:'李芷晴',answers:{'水壩':'mass','金字塔':'mass','城堡':'frame','電塔':'frame','鞦韆架':'frame','摩天輪':'shell','隧道':'shell','飛機':'shell','雨傘':'shell'},score:7,time:Date.now()-40000},
-  {name:'張家俊',answers:{'水壩':'mass','金字塔':'mass','城堡':'shell','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'frame','雨傘':'frame'},score:6,time:Date.now()-30000},
-  {name:'王美琪',answers:{'水壩':'mass','金字塔':'mass','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'shell','雨傘':'shell'},score:9,time:Date.now()-25000},
-  {name:'劉子軒',answers:{'水壩':'mass','金字塔':'mass','城堡':'frame','電塔':'frame','鞦韆架':'frame','摩天輪':'mass','隧道':'shell','飛機':'frame','雨傘':'frame'},score:5,time:Date.now()-20000},
-  {name:'黃曉彤',answers:{'水壩':'mass','金字塔':'mass','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'frame','雨傘':'frame'},score:7,time:Date.now()-15000},
-  {name:'林卓豪',answers:{'水壩':'mass','金字塔':'mass','城堡':'frame','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'shell','雨傘':'shell'},score:8,time:Date.now()-10000},
-  {name:'鄭嘉欣',answers:{'水壩':'mass','金字塔':'shell','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'shell','隧道':'shell','飛機':'shell','雨傘':'frame'},score:6,time:Date.now()-5000}
-];
+// ===== SUBMISSIONS (loaded from Firestore) =====
+var submissions=[];
 
 var currentUser='';
 var hasSubmitted=false;
 var sortCol='score';
 var sortDir=-1;
+
+// ===== FIRESTORE HELPERS =====
+async function loadSubmissions(){
+  var snapshot=await db.collection('submissions').get();
+  submissions=[];
+  snapshot.forEach(function(doc){
+    submissions.push(doc.data());
+  });
+}
+
+async function saveSubmission(record){
+  await db.collection('submissions').doc(record.name).set(record);
+}
+
+async function deleteAllSubmissions(){
+  var snapshot=await db.collection('submissions').get();
+  var batch=db.batch();
+  snapshot.forEach(function(doc){
+    batch.delete(doc.ref);
+  });
+  await batch.commit();
+}
 
 // ===== DRAWING FUNCTIONS =====
 function drawDam(c){
@@ -352,8 +395,8 @@ function login(){
     if(pw!==ADMIN_PW){document.getElementById('loginErr').textContent='⚠️ 管理員密碼錯誤';return;}
     currentUser=name;
     document.getElementById('loginScreen').style.display='none';
-    renderAdmin();
     document.getElementById('adminScreen').style.display='block';
+    renderAdmin();
   }else{
     currentUser=name;
     document.getElementById('loginScreen').style.display='none';
@@ -439,23 +482,32 @@ function initQuiz(){
   });
 }
 
-function submitAnswers(){
+async function submitAnswers(){
   if(hasSubmitted){showModal('ℹ️','已提交','你已經提交過答案了。');return;}
   var unanswered=sel.filter(function(s){return s===null;}).length;
   if(unanswered>0){showModal('⚠️','未完成','還有 '+unanswered+' 格未作答，請全部完成後再提交。');return;}
+
   var ok=0;var answers={};
   quizItems.forEach(function(item,i){answers[item.n]=sel[i];if(sel[i]===item.t)ok++;});
 
-  var existing=submissions.findIndex(function(s){return s.name===currentUser;});
-  var record={name:currentUser,answers:answers,score:ok,time:Date.now()};
+  var submitBtn=document.getElementById('submitBtn');
+  submitBtn.disabled=true;submitBtn.textContent='📤 提交中...';
+  document.getElementById('score').textContent='⏳ 正在儲存到雲端...';
+
   var isOverwrite=false;
-  if(existing!==-1){
-    submissions[existing]=record;
-    isOverwrite=true;
-  }else{
-    submissions.push(record);
+  try{
+    var existingDoc=await db.collection('submissions').doc(currentUser).get();
+    isOverwrite=existingDoc.exists;
+    var record={name:currentUser,answers:answers,score:ok,time:Date.now()};
+    await db.collection('submissions').doc(currentUser).set(record);
+  }catch(e){
+    submitBtn.disabled=false;submitBtn.textContent='📤 提交答案';
+    document.getElementById('score').textContent='';
+    showModal('❌','提交失敗','無法儲存到雲端，請檢查網路連線後重試。');
+    return;
   }
 
+  submitBtn.disabled=false;submitBtn.textContent='📤 提交答案';
   hasSubmitted=true;
   document.querySelectorAll('#grid .cell').forEach(function(cell,i){
     cell.classList.remove('ok','no');cell.classList.add('locked');
@@ -480,17 +532,45 @@ function rstQuiz(){
 function confirmReset(){
   showModal('⚠️','確認重設','確定要刪除所有學生的記錄嗎？此操作無法復原。',[
     {text:'取消',cls:'btn-cancel',fn:closeModal},
-    {text:'確認刪除',cls:'btn-danger',fn:function(){
-      submissions=[];
+    {text:'確認刪除',cls:'btn-danger',fn:async function(){
       closeModal();
-      renderAdmin();
-      showModal('✅','已重設','所有學生記錄已被清除。');
+      document.getElementById('statsRow').innerHTML=
+        '<div class="stat-card" style="flex:auto;width:100%"><div class="loading">刪除中</div></div>';
+      document.getElementById('errorBars').innerHTML='<div class="loading">刪除中</div>';
+      document.getElementById('studentTable').innerHTML='<div class="loading">刪除中</div>';
+      try{
+        await deleteAllSubmissions();
+        submissions=[];
+        renderAdminUI();
+        showModal('✅','已重設','所有學生記錄已被清除。');
+      }catch(e){
+        renderAdmin();
+        showModal('❌','刪除失敗','無法刪除雲端資料，請重試。');
+      }
     }}
   ]);
 }
 
-// ===== ADMIN =====
-function renderAdmin(){
+// ===== ADMIN: RENDER =====
+async function renderAdmin(){
+  document.getElementById('statsRow').innerHTML=
+    '<div class="stat-card" style="flex:auto;width:100%"><div class="loading">載入資料中</div></div>';
+  document.getElementById('errorBars').innerHTML='<div class="loading">載入中</div>';
+  document.getElementById('studentTable').innerHTML='<div class="loading">載入中</div>';
+
+  try{
+    await loadSubmissions();
+  }catch(e){
+    document.getElementById('statsRow').innerHTML='';
+    document.getElementById('errorBars').innerHTML='<div class="empty-msg">⚠️ 載入失敗，請檢查網路連線後重試</div>';
+    document.getElementById('studentTable').innerHTML='<div class="empty-msg">⚠️ 載入失敗</div>';
+    return;
+  }
+
+  renderAdminUI();
+}
+
+function renderAdminUI(){
   var total=submissions.length;
   var avgScore=total?submissions.reduce(function(s,r){return s+r.score;},0)/total:0;
   var perfect=submissions.filter(function(r){return r.score===9;}).length;
