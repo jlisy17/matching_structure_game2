@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>建築結構配對工作紙 (3×3)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Microsoft JhengHei','PingFang TC','Noto Sans TC',sans-serif;min-height:100vh}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);padding:20px}
+.login-card{background:#fff;border-radius:20px;padding:40px 30px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:380px;width:100%}
+.login-card h1{font-size:clamp(1.2rem,4vw,1.7rem);color:#333;margin-bottom:6px}
+.login-card p{color:#666;margin-bottom:20px;font-size:clamp(.82rem,2.5vw,1rem)}
+.login-card input{width:100%;padding:13px 16px;border:2px solid #ddd;border-radius:12px;font-size:1rem;font-family:inherit;outline:none;transition:.2s;margin-bottom:10px}
+.login-card input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.2)}
+#pwRow{display:none;position:relative}
+#pwRow input{margin-bottom:0}
+#pwToggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;user-select:none;color:#888}
+.login-card .lbtn{margin-top:16px;width:100%;padding:13px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;font-family:inherit;transition:.2s}
+.login-card .lbtn:hover{opacity:.9;transform:translateY(-2px)}
+.login-err{color:#e53935;font-size:.85rem;margin-top:10px;min-height:1.3em}
+
+/* QUIZ */
+#quizScreen{display:none;background:linear-gradient(135deg,#e8eaf6,#fce4ec);padding:12px;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;max-width:520px;margin:0 auto 4px;flex-wrap:wrap;gap:4px}
+.topbar .welcome{font-size:clamp(.75rem,2.2vw,.92rem);color:#555;font-weight:600}
+.logout-btn{padding:5px 14px;background:#78909c;color:#fff;border:none;border-radius:8px;font-size:clamp(.68rem,1.8vw,.82rem);cursor:pointer;font-family:inherit;font-weight:bold;transition:.2s}
+.logout-btn:hover{opacity:.8}
+h1{text-align:center;font-size:clamp(1.1rem,4vw,1.7rem);color:#333;margin:4px 0}
+.sub{text-align:center;font-size:clamp(.72rem,2.2vw,.95rem);color:#666;margin-bottom:10px}
+.legend{display:flex;justify-content:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.legend span{padding:5px 16px;border-radius:20px;font-size:clamp(.68rem,2vw,.9rem);font-weight:bold}
+.lm{background:#ffcdd2;border:2px solid #e53935;color:#b71c1c}
+.lf{background:#bbdefb;border:2px solid #1e88e5;color:#0d47a1}
+.ls{background:#c8e6c9;border:2px solid #43a047;color:#1b5e20}
+.wrap{max-width:520px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cell{aspect-ratio:1;background:#fff;border:3px solid #bbb;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px;transition:all .18s;user-select:none;position:relative}
+.cell:hover{transform:scale(1.06);z-index:3;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.cell:active{transform:scale(.94)}
+.cell.locked{pointer-events:none;opacity:.85}
+.cell canvas{width:72%;height:56%;display:block}
+.cell .n{font-size:clamp(.7rem,2.5vw,1rem);color:#444;text-align:center;line-height:1.2;margin-top:4px;font-weight:700}
+.cell .tag{font-size:clamp(.55rem,1.8vw,.78rem);color:#888;margin-top:2px;min-height:1.2em;font-weight:600;transition:all .15s}
+.cell.sm{background:#ffebee;border-color:#e53935}.cell.sm .tag{color:#b71c1c}
+.cell.sf{background:#e3f2fd;border-color:#1e88e5}.cell.sf .tag{color:#0d47a1}
+.cell.ss{background:#e8f5e9;border-color:#43a047}.cell.ss .tag{color:#1b5e20}
+.cell.ok::after{content:'✓';position:absolute;top:4px;right:8px;color:#1b5e20;font-size:clamp(.9rem,3vw,1.4rem);font-weight:900}
+.cell.no::after{content:'✗';position:absolute;top:4px;right:8px;color:#b71c1c;font-size:clamp(.9rem,3vw,1.4rem);font-weight:900}
+.btns{text-align:center;margin:14px 0}
+.btns button{padding:9px 20px;margin:4px;border:none;border-radius:10px;font-size:clamp(.78rem,2.4vw,1rem);cursor:pointer;font-family:inherit;color:#fff;font-weight:bold;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.btns button:hover{opacity:.85;transform:translateY(-2px)}
+.bc{background:#43a047}.br{background:#ef6c00}.ba{background:#1565c0}.bp{background:#546e7a}
+#score{text-align:center;font-size:clamp(.88rem,2.8vw,1.15rem);font-weight:bold;color:#333;margin:8px 0;min-height:1.6em}
+.tip{text-align:center;font-size:clamp(.62rem,1.8vw,.8rem);color:#888;margin-top:6px;line-height:1.5}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:28px 24px;text-align:center;max-width:420px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto}
+.modal-box .mi{font-size:2.5rem;margin-bottom:8px}
+.modal-box .mt{font-size:clamp(1rem,3vw,1.3rem);font-weight:bold;color:#333;margin-bottom:6px}
+.modal-box .ms{font-size:clamp(.82rem,2.5vw,1rem);color:#666;margin-bottom:16px;line-height:1.4}
+.modal-box .mbtn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.modal-box button{padding:10px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:bold;cursor:pointer;font-family:inherit}
+.modal-box .btn-cancel{background:#bbb}
+.modal-box .btn-danger{background:linear-gradient(135deg,#e53935,#c62828)}
+
+/* Answer Key Grid in modal */
+.ans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;text-align:left}
+.ans-item{background:#f5f5f5;border-radius:10px;padding:10px;border-left:4px solid #999}
+.ans-item.am{border-left-color:#e53935;background:#fff5f5}
+.ans-item.af{border-left-color:#1e88e5;background:#f0f7ff}
+.ans-item.as{border-left-color:#43a047;background:#f2fdf3}
+.ans-item .ai-name{font-weight:800;font-size:clamp(.78rem,2.2vw,.95rem);color:#333}
+.ans-item .ai-type{font-size:clamp(.65rem,1.8vw,.82rem);font-weight:600;margin-top:2px}
+.ans-item.am .ai-type{color:#b71c1c}
+.ans-item.af .ai-type{color:#0d47a1}
+.ans-item.as .ai-type{color:#1b5e20}
+
+/* ADMIN */
+#adminScreen{display:none;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;padding:12px;color:#eee}
+.admin-topbar{display:flex;justify-content:space-between;align-items:center;max-width:900px;margin:0 auto 14px;flex-wrap:wrap;gap:8px}
+.admin-topbar h1{color:#fff;font-size:clamp(1rem,3.5vw,1.5rem)}
+.admin-topbar-btns{display:flex;gap:8px;flex-wrap:wrap}
+.reset-btn{padding:6px 16px;background:linear-gradient(135deg,#e53935,#c62828);color:#fff;border:none;border-radius:8px;font-size:clamp(.68rem,1.8vw,.82rem);cursor:pointer;font-family:inherit;font-weight:bold;transition:.2s}
+.reset-btn:hover{opacity:.85;transform:translateY(-1px)}
+.answer-btn{padding:6px 16px;background:linear-gradient(135deg,#43a047,#2e7d32);color:#fff;border:none;border-radius:8px;font-size:clamp(.68rem,1.8vw,.82rem);cursor:pointer;font-family:inherit;font-weight:bold;transition:.2s}
+.answer-btn:hover{opacity:.85;transform:translateY(-1px)}
+.stats-row{display:flex;gap:10px;max-width:900px;margin:0 auto 14px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:100px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 10px;text-align:center}
+.stat-card .num{font-size:clamp(1.3rem,4vw,2rem);font-weight:900;color:#64b5f6}
+.stat-card .num.g{color:#66bb6a}.stat-card .num.r{color:#ef5350}.stat-card .num.y{color:#ffd54f}
+.stat-card .label{font-size:clamp(.6rem,1.6vw,.78rem);color:#aaa;margin-top:4px}
+.section{max-width:900px;margin:0 auto 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px}
+.section h2{font-size:clamp(.88rem,2.8vw,1.15rem);margin-bottom:12px;color:#90caf9}
+.ebar{margin-bottom:10px}
+.ebar-top{display:flex;justify-content:space-between;align-items:center;font-size:clamp(.68rem,2vw,.85rem);margin-bottom:4px}
+.ebar-top .ename{font-weight:700}.ebar-top .etype{color:#aaa;font-size:clamp(.58rem,1.5vw,.72rem)}
+.ebar-top .epct{color:#ffd54f;font-weight:700}
+.ebar-bg{background:rgba(255,255,255,.1);border-radius:6px;height:18px;overflow:hidden}
+.ebar-fill{height:100%;border-radius:6px;transition:width .6s}
+.ebar-note{font-size:clamp(.55rem,1.4vw,.7rem);color:#999;margin-top:2px}
+.teach-tip{background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:10px;padding:12px;margin-top:14px;font-size:clamp(.7rem,2vw,.85rem);color:#ffd54f;line-height:1.5}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:clamp(.58rem,1.5vw,.78rem);min-width:620px}
+th{background:rgba(255,255,255,.12);padding:8px 5px;text-align:center;font-weight:700;white-space:nowrap;position:sticky;top:0;cursor:pointer;user-select:none;transition:.15s}
+th:hover{background:rgba(255,255,255,.2)}
+th.sort-active{color:#ffd54f}
+th .sort-arrow{font-size:.7em;margin-left:3px;opacity:.5}
+th.sort-active .sort-arrow{opacity:1}
+td{padding:7px 5px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06)}
+tr:hover td{background:rgba(255,255,255,.04)}
+.td-ok{color:#66bb6a;font-weight:700}
+.td-no{color:#ef5350;font-weight:600}
+.td-name{text-align:left;font-weight:600;white-space:nowrap}
+.td-score{font-weight:900;color:#ffd54f}
+.tfoot td{background:rgba(255,255,255,.08);font-weight:700;color:#ef5350;border-top:2px solid rgba(255,255,255,.15)}
+.empty-msg{text-align:center;color:#999;padding:30px 10px;font-size:clamp(.85rem,2.5vw,1.1rem)}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+<div class="login-card">
+<h1>🏗️ 建築結構配對活動</h1>
+<p>請輸入你的名字以開始</p>
+<input type="text" id="nameInput" placeholder="你的名字" maxlength="20" oninput="onNameInput()">
+<div id="pwRow">
+<input type="password" id="pwInput" placeholder="請輸入管理員密碼">
+<span id="pwToggle" onclick="togglePw()">👁️</span>
+</div>
+<button class="lbtn" onclick="login()">進入 →</button>
+<div class="login-err" id="loginErr"></div>
+</div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="quizScreen">
+<div class="topbar">
+<span class="welcome" id="welcomeMsg"></span>
+<button class="logout-btn" onclick="logout()">登出</button>
+</div>
+<h1>🏗️ 建築結構配對活動</h1>
+<p class="sub">點擊格子選擇結構類型（可重複點擊切換）</p>
+<div class="legend">
+<span class="lm">🔴 質量結構</span>
+<span class="lf">🔵 支架結構</span>
+<span class="ls">🟢 殼形結構</span>
+</div>
+<div class="wrap"><div id="grid" class="grid"></div></div>
+<div class="btns" id="quizBtns">
+<button class="ba" onclick="submitAnswers()">📤 提交答案</button>
+<button class="br" onclick="rstQuiz()">🔄 重置</button>
+</div>
+<div id="score"></div>
+<p class="tip">💡 質量結構：靠自身重量穩定 ｜ 支架結構：由支桿連接而成 ｜ 殼形結構：將負荷經物料傳遞分散</p>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modal">
+<div class="modal-box">
+<div class="mi" id="modalIcon">✅</div>
+<div class="mt" id="modalTitle"></div>
+<div class="ms" id="modalMsg"></div>
+<div id="modalExtra"></div>
+<div class="mbtn-row" id="modalBtns">
+<button onclick="closeModal()">確定</button>
+</div>
+</div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div id="adminScreen">
+<div class="admin-topbar">
+<h1>📊 管理員面板</h1>
+<div class="admin-topbar-btns">
+<button class="answer-btn" onclick="showAnswerKey()">📖 顯示正確答案</button>
+<button class="reset-btn" onclick="confirmReset()">🗑️ 重設所有記錄</button>
+<button class="logout-btn" onclick="logout()">登出</button>
+</div>
+</div>
+<div class="stats-row" id="statsRow"></div>
+<div class="section" id="errorSection"><h2>📈 答錯率分析</h2><div id="errorBars"></div></div>
+<div class="section"><h2>📋 學生答案詳情 <span style="font-size:.7em;color:#aaa">（點擊表頭排序）</span></h2><div class="tbl-wrap" id="studentTable"></div></div>
+</div>
+
+<script>
+// ===== CONFIG =====
+var ADMIN_NAME='lsy';
+var ADMIN_PW='lsy617';
+
+// ===== CORRECT ANSWERS =====
+var correctMap={
+  '水壩':'mass','金字塔':'mass','城堡':'mass',
+  '電塔':'frame','鞦韆架':'frame','摩天輪':'frame',
+  '隧道':'shell','飛機':'shell','雨傘':'shell'
+};
+var tagLabels={mass:'質量結構',frame:'支架結構',shell:'殼形結構'};
+var tagEmoji={mass:'🔴',frame:'🔵',shell:'🟢'};
+var tagCls={mass:'am',frame:'af',shell:'as'};
+var itemOrder=['水壩','金字塔','城堡','電塔','鞦韆架','摩天輪','隧道','飛機','雨傘'];
+
+// ===== SUBMISSIONS STORAGE =====
+var submissions=[
+  {name:'陳小明',answers:{'水壩':'mass','金字塔':'mass','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'shell','雨傘':'frame'},score:8,time:Date.now()-50000},
+  {name:'李芷晴',answers:{'水壩':'mass','金字塔':'mass','城堡':'frame','電塔':'frame','鞦韆架':'frame','摩天輪':'shell','隧道':'shell','飛機':'shell','雨傘':'shell'},score:7,time:Date.now()-40000},
+  {name:'張家俊',answers:{'水壩':'mass','金字塔':'mass','城堡':'shell','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'frame','雨傘':'frame'},score:6,time:Date.now()-30000},
+  {name:'王美琪',answers:{'水壩':'mass','金字塔':'mass','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'shell','雨傘':'shell'},score:9,time:Date.now()-25000},
+  {name:'劉子軒',answers:{'水壩':'mass','金字塔':'mass','城堡':'frame','電塔':'frame','鞦韆架':'frame','摩天輪':'mass','隧道':'shell','飛機':'frame','雨傘':'frame'},score:5,time:Date.now()-20000},
+  {name:'黃曉彤',answers:{'水壩':'mass','金字塔':'mass','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'frame','雨傘':'frame'},score:7,time:Date.now()-15000},
+  {name:'林卓豪',answers:{'水壩':'mass','金字塔':'mass','城堡':'frame','電塔':'frame','鞦韆架':'frame','摩天輪':'frame','隧道':'shell','飛機':'shell','雨傘':'shell'},score:8,time:Date.now()-10000},
+  {name:'鄭嘉欣',answers:{'水壩':'mass','金字塔':'shell','城堡':'mass','電塔':'frame','鞦韆架':'frame','摩天輪':'shell','隧道':'shell','飛機':'shell','雨傘':'frame'},score:6,time:Date.now()-5000}
+];
+
+var currentUser='';
+var hasSubmitted=false;
+var sortCol='score';
+var sortDir=-1;
+
+// ===== DRAWING FUNCTIONS =====
+function drawDam(c){
+  c.fillStyle='#90caf9';c.globalAlpha=.5;c.fillRect(5,35,28,48);c.globalAlpha=1;
+  c.beginPath();c.moveTo(28,83);c.lineTo(36,18);c.lineTo(68,18);c.lineTo(82,83);c.closePath();
+  c.fillStyle='#9e9e9e';c.fill();c.strokeStyle='#616161';c.lineWidth=2;c.stroke();
+  c.beginPath();c.moveTo(3,83);c.lineTo(97,83);c.strokeStyle='#795548';c.stroke();
+  c.strokeStyle='#42a5f5';c.lineWidth=1.5;c.beginPath();
+  for(var x=5;x<32;x+=10){c.moveTo(x,50);c.quadraticCurveTo(x+3,46,x+6,50);}c.stroke();
+}
+function drawPyramid(c){
+  c.beginPath();c.moveTo(50,10);c.lineTo(8,83);c.lineTo(92,83);c.closePath();
+  c.fillStyle='#e6b422';c.fill();c.strokeStyle='#b8860b';c.lineWidth=2;c.stroke();
+  c.globalAlpha=.3;c.beginPath();c.moveTo(50,10);c.lineTo(50,83);c.stroke();
+  c.beginPath();c.moveTo(50,10);c.lineTo(70,83);c.stroke();c.globalAlpha=1;
+  c.fillStyle='#d4a017';c.fillRect(3,83,94,4);
+}
+function drawCastle(c){
+  c.fillStyle='#9e9e9e';c.strokeStyle='#616161';c.lineWidth=2;
+  c.fillRect(20,40,60,43);c.strokeRect(20,40,60,43);
+  c.fillRect(12,28,18,55);c.strokeRect(12,28,18,55);
+  c.fillRect(70,28,18,55);c.strokeRect(70,28,18,55);
+  var bw=7;for(var x=12;x<30;x+=bw*2){c.fillRect(x,20,bw,8);c.strokeRect(x,20,bw,8);}
+  for(var x=70;x<88;x+=bw*2){c.fillRect(x,20,bw,8);c.strokeRect(x,20,bw,8);}
+  c.fillStyle='#5d4037';c.beginPath();c.arc(50,70,9,Math.PI,0);c.lineTo(59,83);c.lineTo(41,83);c.fill();
+}
+function drawPylon(c){
+  c.strokeStyle='#555';c.lineWidth=2;
+  c.beginPath();c.moveTo(28,85);c.lineTo(43,8);c.stroke();
+  c.beginPath();c.moveTo(72,85);c.lineTo(57,8);c.stroke();
+  c.lineWidth=1.5;var hs=[16,30,44,58,72];
+  hs.forEach(function(h){var l=28+(43-28)*(85-h)/77,r=72-(72-57)*(85-h)/77;c.beginPath();c.moveTo(l,h);c.lineTo(r,h);c.stroke();});
+  c.lineWidth=1;
+  for(var i=0;i<hs.length-1;i++){var h1=hs[i],h2=hs[i+1],l1=28+(43-28)*(85-h1)/77,r1=72-(72-57)*(85-h1)/77,l2=28+(43-28)*(85-h2)/77,r2=72-(72-57)*(85-h2)/77;
+  c.beginPath();c.moveTo(l1,h1);c.lineTo(r2,h2);c.stroke();c.beginPath();c.moveTo(r1,h1);c.lineTo(l2,h2);c.stroke();}
+  c.lineWidth=2.5;c.beginPath();c.moveTo(12,18);c.lineTo(88,18);c.stroke();
+  c.beginPath();c.moveTo(18,34);c.lineTo(82,34);c.stroke();
+  c.fillStyle='#1565c0';[12,88].forEach(function(x){c.beginPath();c.arc(x,18,3,0,6.28);c.fill();});
+  [18,82].forEach(function(x){c.beginPath();c.arc(x,34,3,0,6.28);c.fill();});
+}
+function drawSwing(c){
+  c.strokeStyle='#795548';c.lineWidth=3;
+  c.beginPath();c.moveTo(12,85);c.lineTo(50,12);c.lineTo(88,85);c.stroke();
+  c.strokeStyle='#8d6e63';c.lineWidth=1.8;
+  c.beginPath();c.moveTo(43,15);c.lineTo(36,66);c.stroke();
+  c.beginPath();c.moveTo(57,15);c.lineTo(64,66);c.stroke();
+  c.fillStyle='#4e342e';c.fillRect(33,66,34,5);
+  c.fillStyle='#795548';c.beginPath();c.arc(50,12,4,0,6.28);c.fill();
+}
+function drawFerrisWheel(c){
+  var cx=50,cy=40,r=30;
+  c.strokeStyle='#e91e63';c.lineWidth=2;c.beginPath();c.arc(cx,cy,r,0,6.28);c.stroke();
+  c.lineWidth=1.5;
+  for(var i=0;i<8;i++){var a=i*Math.PI/4;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));c.stroke();}
+  c.fillStyle='#42a5f5';
+  for(var i=0;i<8;i++){var a=i*Math.PI/4;c.beginPath();c.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,6.28);c.fill();}
+  c.strokeStyle='#555';c.lineWidth=3;c.beginPath();c.moveTo(cx,cy);c.lineTo(25,88);c.stroke();
+  c.beginPath();c.moveTo(cx,cy);c.lineTo(75,88);c.stroke();
+  c.fillStyle='#e91e63';c.beginPath();c.arc(cx,cy,4,0,6.28);c.fill();
+}
+function drawTunnel(c){
+  c.beginPath();c.arc(50,74,42,Math.PI,0);c.lineTo(92,86);c.lineTo(8,86);c.closePath();
+  c.fillStyle='#9e9e9e';c.fill();c.strokeStyle='#616161';c.lineWidth=2;c.stroke();
+  c.beginPath();c.arc(50,76,30,Math.PI,0);c.lineTo(80,86);c.lineTo(20,86);c.closePath();
+  c.fillStyle='#37474f';c.fill();
+  c.strokeStyle='#fdd835';c.lineWidth=1.5;c.setLineDash([4,4]);
+  c.beginPath();c.moveTo(50,66);c.lineTo(50,86);c.stroke();c.setLineDash([]);
+  c.fillStyle='#546e7a';c.fillRect(20,80,60,6);
+}
+function drawAirplane(c){
+  c.beginPath();c.moveTo(8,46);c.quadraticCurveTo(8,34,24,34);c.lineTo(78,34);
+  c.quadraticCurveTo(96,34,96,42);c.quadraticCurveTo(96,50,78,50);c.lineTo(24,50);
+  c.quadraticCurveTo(8,50,8,46);c.fillStyle='#eceff1';c.fill();c.strokeStyle='#607d8b';c.lineWidth=1.5;c.stroke();
+  c.fillStyle='#42a5f5';for(var x=28;x<=72;x+=7){c.beginPath();c.arc(x,40,2.2,0,6.28);c.fill();}
+  c.fillStyle='#b0bec5';c.beginPath();c.moveTo(38,50);c.lineTo(28,78);c.lineTo(58,78);c.lineTo(58,50);c.closePath();c.fill();c.strokeStyle='#607d8b';c.stroke();
+  c.beginPath();c.moveTo(14,34);c.lineTo(6,14);c.lineTo(24,14);c.lineTo(24,34);c.closePath();c.fill();c.stroke();
+  c.strokeStyle='#e53935';c.lineWidth=2;c.beginPath();c.moveTo(24,42);c.lineTo(88,42);c.stroke();
+}
+function drawUmbrella(c){
+  c.beginPath();c.arc(50,38,38,Math.PI,0);c.closePath();
+  c.fillStyle='#e53935';c.fill();c.strokeStyle='#b71c1c';c.lineWidth=2;c.stroke();
+  var seg=6;c.beginPath();
+  for(var i=0;i<seg;i++){var x1=12+i*(76/seg),x2=12+(i+1)*(76/seg),mx=(x1+x2)/2;c.moveTo(x1,38);c.quadraticCurveTo(mx,46,x2,38);}
+  c.strokeStyle='#b71c1c';c.lineWidth=1.5;c.stroke();
+  c.globalAlpha=.18;c.fillStyle='#fff';
+  for(var i=0;i<seg;i+=2){var x1=12+i*(76/seg),x2=12+(i+1)*(76/seg);c.beginPath();c.moveTo(50,4);c.lineTo(x1,38);c.lineTo(x2,38);c.closePath();c.fill();}
+  c.globalAlpha=1;c.strokeStyle='#c62828';c.lineWidth=1;
+  for(var i=1;i<seg;i++){var x=12+i*(76/seg);c.beginPath();c.moveTo(50,4);c.lineTo(x,38);c.stroke();}
+  c.strokeStyle='#5d4037';c.lineWidth=3;c.beginPath();c.moveTo(50,10);c.lineTo(50,82);c.stroke();
+  c.lineCap='round';c.beginPath();c.arc(42,82,8,0,Math.PI*.85);c.stroke();
+  c.fillStyle='#5d4037';c.beginPath();c.arc(50,4,2.5,0,6.28);c.fill();
+}
+
+var drawFns={'水壩':drawDam,'金字塔':drawPyramid,'城堡':drawCastle,'電塔':drawPylon,'鞦韆架':drawSwing,'摩天輪':drawFerrisWheel,'隧道':drawTunnel,'飛機':drawAirplane,'雨傘':drawUmbrella};
+
+// ===== QUIZ STATE =====
+var quizItems=[];
+var sel=new Array(9).fill(null);
+
+// ===== PASSWORD TOGGLE =====
+function onNameInput(){
+  var name=document.getElementById('nameInput').value.trim();
+  var pwRow=document.getElementById('pwRow');
+  if(name===ADMIN_NAME){pwRow.style.display='block';}
+  else{pwRow.style.display='none';document.getElementById('pwInput').value='';}
+  document.getElementById('loginErr').textContent='';
+}
+function togglePw(){
+  var inp=document.getElementById('pwInput');
+  if(inp.type==='password'){inp.type='text';document.getElementById('pwToggle').textContent='🙈';}
+  else{inp.type='password';document.getElementById('pwToggle').textContent='👁️';}
+}
+
+// ===== LOGIN =====
+document.getElementById('nameInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    var name=document.getElementById('nameInput').value.trim();
+    if(name===ADMIN_NAME){document.getElementById('pwInput').focus();}
+    else login();
+  }
+});
+document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')login();});
+
+function login(){
+  var name=document.getElementById('nameInput').value.trim();
+  if(!name){document.getElementById('loginErr').textContent='⚠️ 請輸入名字';return;}
+
+  if(name===ADMIN_NAME){
+    var pw=document.getElementById('pwInput').value;
+    if(pw!==ADMIN_PW){document.getElementById('loginErr').textContent='⚠️ 管理員密碼錯誤';return;}
+    currentUser=name;
+    document.getElementById('loginScreen').style.display='none';
+    renderAdmin();
+    document.getElementById('adminScreen').style.display='block';
+  }else{
+    currentUser=name;
+    document.getElementById('loginScreen').style.display='none';
+    initQuiz();
+    document.getElementById('quizScreen').style.display='block';
+  }
+}
+
+function logout(){
+  currentUser='';hasSubmitted=false;sel.fill(null);
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('adminScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('nameInput').value='';
+  document.getElementById('pwInput').value='';
+  document.getElementById('pwRow').style.display='none';
+  document.getElementById('loginErr').textContent='';
+  document.getElementById('grid').innerHTML='';
+  document.getElementById('score').textContent='';
+}
+
+// ===== MODAL =====
+function showModal(icon,title,msg,buttons,extraHtml){
+  document.getElementById('modalIcon').textContent=icon;
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalMsg').textContent=msg;
+  document.getElementById('modalExtra').innerHTML=extraHtml||'';
+  var btnRow=document.getElementById('modalBtns');
+  btnRow.innerHTML='';
+  if(!buttons){
+    btnRow.innerHTML='<button onclick="closeModal()">確定</button>';
+  }else{
+    buttons.forEach(function(b){
+      var btn=document.createElement('button');
+      btn.textContent=b.text;
+      btn.className=b.cls||'';
+      btn.onclick=b.fn;
+      btnRow.appendChild(btn);
+    });
+  }
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+// ===== SHOW ANSWER KEY =====
+function showAnswerKey(){
+  var gridHtml='<div class="ans-grid">';
+  itemOrder.forEach(function(name){
+    var type=correctMap[name];
+    gridHtml+='<div class="ans-item '+tagCls[type]+'">'+
+      '<div class="ai-name">'+tagEmoji[type]+' '+name+'</div>'+
+      '<div class="ai-type">'+tagLabels[type]+'</div>'+
+      '</div>';
+  });
+  gridHtml+='</div>';
+  showModal('📖','正確答案','以下是所有題目的正確分類：',null,gridHtml);
+}
+
+// ===== QUIZ =====
+function initQuiz(){
+  hasSubmitted=false;
+  document.getElementById('welcomeMsg').textContent='👋 歡迎，'+currentUser;
+  quizItems=itemOrder.map(function(n){return{n:n,t:correctMap[n],d:drawFns[n]};});
+  for(var i=quizItems.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=quizItems[i];quizItems[i]=quizItems[j];quizItems[j]=tmp;}
+  sel=new Array(9).fill(null);
+  var grid=document.getElementById('grid');grid.innerHTML='';
+  quizItems.forEach(function(item,idx){
+    var cell=document.createElement('div');cell.className='cell';cell.dataset.i=idx;
+    var cv=document.createElement('canvas');cv.width=100;cv.height=100;cell.appendChild(cv);
+    var lb=document.createElement('div');lb.className='n';lb.textContent=item.n;cell.appendChild(lb);
+    var tg=document.createElement('div');tg.className='tag';tg.id='tag'+idx;cell.appendChild(tg);
+    item.d(cv.getContext('2d'));
+    cell.addEventListener('click',function(){
+      if(hasSubmitted)return;
+      var states=[null,'mass','frame','shell'];
+      var ci=states.indexOf(sel[idx]);var ni=(ci+1)%4;sel[idx]=states[ni];
+      cell.classList.remove('sm','sf','ss','ok','no');
+      if(states[ni]){cell.classList.add('s'+states[ni][0]);tg.textContent=tagLabels[states[ni]];}
+      else tg.textContent='';
+      document.getElementById('score').textContent='';
+    });
+    grid.appendChild(cell);
+  });
+}
+
+function submitAnswers(){
+  if(hasSubmitted){showModal('ℹ️','已提交','你已經提交過答案了。');return;}
+  var unanswered=sel.filter(function(s){return s===null;}).length;
+  if(unanswered>0){showModal('⚠️','未完成','還有 '+unanswered+' 格未作答，請全部完成後再提交。');return;}
+  var ok=0;var answers={};
+  quizItems.forEach(function(item,i){answers[item.n]=sel[i];if(sel[i]===item.t)ok++;});
+
+  var existing=submissions.findIndex(function(s){return s.name===currentUser;});
+  var record={name:currentUser,answers:answers,score:ok,time:Date.now()};
+  var isOverwrite=false;
+  if(existing!==-1){
+    submissions[existing]=record;
+    isOverwrite=true;
+  }else{
+    submissions.push(record);
+  }
+
+  hasSubmitted=true;
+  document.querySelectorAll('#grid .cell').forEach(function(cell,i){
+    cell.classList.remove('ok','no');cell.classList.add('locked');
+    if(sel[i]===quizItems[i].t)cell.classList.add('ok');else cell.classList.add('no');
+  });
+  var overwriteNote=isOverwrite?' （已覆蓋舊記錄）':'';
+  document.getElementById('score').innerHTML='📤 已提交！正確：<span style="color:#2e7d32">'+ok+'</span> / 9'+(ok===9?' 🎉 全對！':'')+overwriteNote;
+  var modalNote=isOverwrite?'（你之前的記錄已被覆蓋）':'';
+  showModal(ok===9?'🎉':'📤',ok===9?'滿分！太厲害了！':'提交成功！','你的分數是 '+ok+' / 9 '+modalNote);
+}
+
+function rstQuiz(){
+  hasSubmitted=false;sel.fill(null);
+  document.querySelectorAll('#grid .cell').forEach(function(cell,i){
+    cell.classList.remove('sm','sf','ss','ok','no','locked');
+    document.getElementById('tag'+i).textContent='';
+  });
+  document.getElementById('score').textContent='';
+}
+
+// ===== ADMIN: RESET =====
+function confirmReset(){
+  showModal('⚠️','確認重設','確定要刪除所有學生的記錄嗎？此操作無法復原。',[
+    {text:'取消',cls:'btn-cancel',fn:closeModal},
+    {text:'確認刪除',cls:'btn-danger',fn:function(){
+      submissions=[];
+      closeModal();
+      renderAdmin();
+      showModal('✅','已重設','所有學生記錄已被清除。');
+    }}
+  ]);
+}
+
+// ===== ADMIN =====
+function renderAdmin(){
+  var total=submissions.length;
+  var avgScore=total?submissions.reduce(function(s,r){return s+r.score;},0)/total:0;
+  var perfect=submissions.filter(function(r){return r.score===9;}).length;
+  var lowest=total?Math.min.apply(null,submissions.map(function(r){return r.score;})):'-';
+
+  document.getElementById('statsRow').innerHTML=
+    '<div class="stat-card"><div class="num">'+total+'</div><div class="label">提交人數</div></div>'+
+    '<div class="stat-card"><div class="num y">'+avgScore.toFixed(1)+'</div><div class="label">平均分 / 9</div></div>'+
+    '<div class="stat-card"><div class="num g">'+perfect+'</div><div class="label">滿分人數</div></div>'+
+    '<div class="stat-card"><div class="num r">'+lowest+'</div><div class="label">最低分</div></div>';
+
+  if(total===0){
+    document.getElementById('errorBars').innerHTML='<div class="empty-msg">暫無提交記錄</div>';
+    document.getElementById('studentTable').innerHTML='<div class="empty-msg">暫無提交記錄</div>';
+    return;
+  }
+
+  var errors={};var wrongChoices={};
+  itemOrder.forEach(function(name){errors[name]=0;wrongChoices[name]={};});
+  submissions.forEach(function(r){
+    itemOrder.forEach(function(name){
+      if(r.answers[name]!==correctMap[name]){
+        errors[name]++;
+        var wc=tagLabels[r.answers[name]];
+        wrongChoices[name][wc]=(wrongChoices[name][wc]||0)+1;
+      }
+    });
+  });
+
+  var sorted=itemOrder.slice().sort(function(a,b){return errors[b]-errors[a];});
+  var barsHtml='';
+  sorted.forEach(function(name){
+    var cnt=errors[name];var pct=total?(cnt/total*100):0;
+    var color=pct>=50?'#ef5350':pct>=25?'#ffa726':'#66bb6a';
+    var wrongDetail='';
+    if(cnt>0){
+      var wcs=Object.keys(wrongChoices[name]).sort(function(a,b){return wrongChoices[name][b]-wrongChoices[name][a];});
+      wrongDetail='多數誤選：'+wcs.map(function(w){return w+'('+wrongChoices[name][w]+'人)';}).join('、');
+    }
+    barsHtml+='<div class="ebar">'+
+      '<div class="ebar-top"><span><span class="ename">'+name+'</span> <span class="etype">（正確：'+tagLabels[correctMap[name]]+'）</span></span><span class="epct">'+cnt+'人答錯 ('+pct.toFixed(0)+'%)</span></div>'+
+      '<div class="ebar-bg"><div class="ebar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      (wrongDetail?'<div class="ebar-note">'+wrongDetail+'</div>':'')+
+      '</div>';
+  });
+
+  var worstItem=sorted[0];
+  if(errors[worstItem]>0){
+    var topWrong=Object.keys(wrongChoices[worstItem]).sort(function(a,b){return wrongChoices[worstItem][b]-wrongChoices[worstItem][a];})[0];
+    barsHtml+='<div class="teach-tip">💡 <b>教學建議：</b>學生最容易將「'+worstItem+'」誤判為「'+topWrong+'」（共'+errors[worstItem]+'人答錯，佔'+Math.round(errors[worstItem]/total*100)+'%）。建議加強講解「'+tagLabels[correctMap[worstItem]]+'」的定義與特徵，並與「'+topWrong+'」作比較。</div>';
+  }
+  document.getElementById('errorBars').innerHTML=barsHtml;
+
+  renderStudentTable(errors);
+}
+
+function renderStudentTable(errors){
+  var total=submissions.length;
+  if(!total){document.getElementById('studentTable').innerHTML='<div class="empty-msg">暫無提交記錄</div>';return;}
+
+  var sorted=submissions.slice();
+  sorted.sort(function(a,b){
+    var va,vb;
+    if(sortCol==='name'){va=a.name;vb=b.name;return sortDir*(va<vb?-1:va>vb?1:0);}
+    if(sortCol==='score'){va=a.score;vb=b.score;return sortDir*(va-vb);}
+    if(sortCol==='#'){return 0;}
+    var ca=a.answers[sortCol]===correctMap[sortCol]?1:0;
+    var cb=b.answers[sortCol]===correctMap[sortCol]?1:0;
+    return sortDir*(ca-cb);
+  });
+
+  var cols=['#','name'].concat(itemOrder).concat(['score']);
+  var colLabels={'#':'#','name':'學生','score':'分數'};
+  itemOrder.forEach(function(n){colLabels[n]=n;});
+
+  var arrow=function(col){
+    var isActive=sortCol===col;
+    var symbol=isActive?(sortDir===1?' ↑':' ↓'):' ↕';
+    return '<span class="sort-arrow">'+symbol+'</span>';
+  };
+
+  var th='<table><thead><tr>';
+  cols.forEach(function(col){
+    var cls=sortCol===col?' class="sort-active"':'';
+    th+='<th'+cls+' data-col="'+col+'">'+colLabels[col]+arrow(col)+'</th>';
+  });
+  th+='</tr></thead><tbody>';
+
+  var rows='';
+  sorted.forEach(function(r,idx){
+    rows+='<tr><td>'+(idx+1)+'</td><td class="td-name">'+r.name+'</td>';
+    itemOrder.forEach(function(name){
+      var ans=r.answers[name];var correct=correctMap[name];
+      if(ans===correct){rows+='<td class="td-ok">✓</td>';}
+      else{rows+='<td class="td-no">✗ '+tagLabels[ans]+'</td>';}
+    });
+    rows+='<td class="td-score">'+r.score+'/9</td></tr>';
+  });
+
+  if(!errors){
+    errors={};
+    itemOrder.forEach(function(name){errors[name]=0;});
+    submissions.forEach(function(r){
+      itemOrder.forEach(function(name){if(r.answers[name]!==correctMap[name])errors[name]++;});
+    });
+  }
+
+  var foot='<tr class="tfoot"><td></td><td>答錯人數</td>';
+  itemOrder.forEach(function(name){foot+='<td>'+errors[name]+'</td>';});
+  foot+='<td></td></tr>';
+
+  document.getElementById('studentTable').innerHTML=th+rows+'</tbody><tfoot>'+foot+'</tfoot></table>';
+
+  document.querySelectorAll('#studentTable th').forEach(function(thEl){
+    thEl.addEventListener('click',function(){
+      var col=thEl.dataset.col;
+      if(col==='#')return;
+      if(sortCol===col){sortDir*=-1;}else{sortCol=col;sortDir=col==='score'?-1:1;}
+      renderStudentTable();
+    });
+  });
+}
+</script>
+</body>
+</html>
