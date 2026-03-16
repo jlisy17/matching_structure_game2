@@ -223,16 +223,16 @@ var db = firebase.firestore();
 var ADMIN_NAME='lsy';
 var ADMIN_PW='lsy617';
 
-// ===== CORRECT ANSWERS (已更新) =====
+// ===== CORRECT ANSWERS =====
 var correctMap={
-  '水壩':'mass','石壆':'mass','水馬':'mass',
+  '水壩':'mass','石墩':'mass','水馬':'mass',
   '電塔':'frame','棚架':'frame','摩天輪':'frame',
   '隧道':'shell','碗':'shell','安全帽':'shell'
 };
 var tagLabels={mass:'質量結構',frame:'支架結構',shell:'殼形結構'};
 var tagEmoji={mass:'🔴',frame:'🔵',shell:'🟢'};
 var tagCls={mass:'am',frame:'af',shell:'as'};
-var itemOrder=['水壩','石壆','水馬','電塔','棚架','摩天輪','隧道','碗','安全帽'];
+var itemOrder=['水壩','石墩','水馬','電塔','棚架','摩天輪','隧道','碗','安全帽'];
 
 // ===== SUBMISSIONS (loaded from Firestore) =====
 var submissions=[];
@@ -276,35 +276,39 @@ function drawDam(c){
   for(var x=5;x<32;x+=10){c.moveTo(x,50);c.quadraticCurveTo(x+3,46,x+6,50);}c.stroke();
 }
 
-// --- 石壆 (Mass) - 取代金字塔 ---
-function drawStoneBarrier(c){
-  // 主體 - 梯形石壆
+// --- 石墩 (Mass) ---
+function drawStoneBollard(c){
+  // 圓柱形石墩主體
+  c.fillStyle='#9e9e9e';
   c.beginPath();
-  c.moveTo(22,22);c.lineTo(78,22);c.lineTo(86,80);c.lineTo(14,80);
-  c.closePath();
-  c.fillStyle='#9e9e9e';c.fill();
+  c.moveTo(30,28);c.lineTo(28,72);c.lineTo(72,72);c.lineTo(70,28);
+  c.closePath();c.fill();
   c.strokeStyle='#757575';c.lineWidth=2;c.stroke();
-  // 頂蓋
-  c.fillStyle='#bdbdbd';
-  c.fillRect(18,18,64,6);
-  c.strokeStyle='#757575';c.lineWidth=1.5;c.strokeRect(18,18,64,6);
-  // 石紋 - 橫線
-  c.strokeStyle='#757575';c.lineWidth=1;
-  c.beginPath();c.moveTo(21,37);c.lineTo(79,37);c.stroke();
-  c.beginPath();c.moveTo(19,52);c.lineTo(82,52);c.stroke();
-  c.beginPath();c.moveTo(17,67);c.lineTo(84,67);c.stroke();
-  // 石紋 - 直線（磚塊效果）
-  c.beginPath();c.moveTo(50,22);c.lineTo(50,37);c.stroke();
-  c.beginPath();c.moveTo(35,37);c.lineTo(34,52);c.stroke();
-  c.beginPath();c.moveTo(65,37);c.lineTo(66,52);c.stroke();
-  c.beginPath();c.moveTo(50,52);c.lineTo(50,67);c.stroke();
-  c.beginPath();c.moveTo(30,67);c.lineTo(28,80);c.stroke();
-  c.beginPath();c.moveTo(68,67);c.lineTo(70,80);c.stroke();
+  // 頂部圓頂
+  c.beginPath();
+  c.arc(50,28,21,Math.PI,0);
+  c.fillStyle='#bdbdbd';c.fill();
+  c.strokeStyle='#757575';c.lineWidth=2;c.stroke();
+  // 頂部橢圓面
+  c.beginPath();
+  c.ellipse(50,28,21,6,0,0,Math.PI*2);
+  c.fillStyle='#c0c0c0';c.fill();
+  c.strokeStyle='#757575';c.lineWidth=1.5;c.stroke();
+  // 底座（較寬）
+  c.fillStyle='#888';
+  c.beginPath();
+  c.moveTo(22,72);c.lineTo(20,82);c.lineTo(80,82);c.lineTo(78,72);
+  c.closePath();c.fill();
+  c.strokeStyle='#666';c.lineWidth=2;c.stroke();
+  // 石紋
+  c.strokeStyle='#aaa';c.lineWidth=1;
+  c.beginPath();c.moveTo(32,42);c.lineTo(68,42);c.stroke();
+  c.beginPath();c.moveTo(30,56);c.lineTo(70,56);c.stroke();
   // 地面
-  c.fillStyle='#795548';c.fillRect(5,80,90,5);
+  c.fillStyle='#795548';c.fillRect(5,82,90,4);
 }
 
-// --- 水馬 (Mass) - 取代鞦韆架 ---
+// --- 水馬 (Mass) ---
 function drawWaterBarrier(c){
   // 主體 - 橙紅色梯形
   c.beginPath();
@@ -351,7 +355,7 @@ function drawPylon(c){
   [18,82].forEach(function(x){c.beginPath();c.arc(x,34,3,0,6.28);c.fill();});
 }
 
-// --- 棚架 (Frame) - 取代城堡 ---
+// --- 棚架 (Frame) ---
 function drawScaffolding(c){
   c.strokeStyle='#546e7a';c.lineWidth=2.5;
   // 直柱
@@ -366,17 +370,14 @@ function drawScaffolding(c){
   });
   // 交叉支撐
   c.strokeStyle='#78909c';c.lineWidth=1.5;
-  // 上層X
   c.beginPath();c.moveTo(16,12);c.lineTo(50,38);c.stroke();
   c.beginPath();c.moveTo(50,12);c.lineTo(16,38);c.stroke();
   c.beginPath();c.moveTo(50,12);c.lineTo(84,38);c.stroke();
   c.beginPath();c.moveTo(84,12);c.lineTo(50,38);c.stroke();
-  // 中層X
   c.beginPath();c.moveTo(16,38);c.lineTo(50,62);c.stroke();
   c.beginPath();c.moveTo(50,38);c.lineTo(16,62);c.stroke();
   c.beginPath();c.moveTo(50,38);c.lineTo(84,62);c.stroke();
   c.beginPath();c.moveTo(84,38);c.lineTo(50,62);c.stroke();
-  // 下層X
   c.beginPath();c.moveTo(16,62);c.lineTo(50,86);c.stroke();
   c.beginPath();c.moveTo(50,62);c.lineTo(16,86);c.stroke();
   c.beginPath();c.moveTo(50,62);c.lineTo(84,86);c.stroke();
@@ -418,9 +419,8 @@ function drawTunnel(c){
   c.fillStyle='#546e7a';c.fillRect(20,80,60,6);
 }
 
-// --- 碗 (Shell) - 取代飛機 ---
+// --- 碗 (Shell) ---
 function drawBowl(c){
-  // 碗身
   c.beginPath();
   c.moveTo(10,32);
   c.quadraticCurveTo(14,80,50,84);
@@ -428,58 +428,48 @@ function drawBowl(c){
   c.closePath();
   c.fillStyle='#e0e0e0';c.fill();
   c.strokeStyle='#9e9e9e';c.lineWidth=2.5;c.stroke();
-  // 碗口（橢圓）
   c.beginPath();
   c.ellipse(50,32,40,9,0,0,Math.PI*2);
   c.fillStyle='#f5f5f5';c.fill();
   c.strokeStyle='#9e9e9e';c.lineWidth=2;c.stroke();
-  // 內部陰影
   c.beginPath();
   c.ellipse(50,34,32,6,0,0,Math.PI);
   c.fillStyle='rgba(0,0,0,0.06)';c.fill();
-  // 裝飾線條
   c.strokeStyle='#bdbdbd';c.lineWidth=1.2;
   c.beginPath();c.ellipse(50,50,30,4,0,0.1,Math.PI-0.1);c.stroke();
   c.beginPath();c.ellipse(50,64,20,3,0,0.1,Math.PI-0.1);c.stroke();
-  // 碗底
   c.fillStyle='#bdbdbd';
   c.beginPath();c.ellipse(50,84,10,3,0,0,Math.PI*2);c.fill();
   c.strokeStyle='#9e9e9e';c.lineWidth=1.5;c.stroke();
 }
 
-// --- 安全帽 (Shell) - 取代雨傘 ---
+// --- 安全帽 (Shell) ---
 function drawHelmet(c){
-  // 主體圓頂
   c.beginPath();
   c.arc(50,48,36,Math.PI,0);
   c.closePath();
   c.fillStyle='#fdd835';c.fill();
   c.strokeStyle='#f9a825';c.lineWidth=2.5;c.stroke();
-  // 帽簷
   c.beginPath();
   c.moveTo(8,48);c.lineTo(92,48);c.lineTo(88,58);c.lineTo(12,58);
   c.closePath();
   c.fillStyle='#fbc02d';c.fill();
   c.strokeStyle='#f9a825';c.lineWidth=2;c.stroke();
-  // 頂部脊線
   c.strokeStyle='#f9a825';c.lineWidth=3;
   c.beginPath();c.moveTo(32,22);c.lineTo(68,22);c.stroke();
-  // 帽帶
   c.fillStyle='rgba(0,0,0,0.12)';
   c.fillRect(14,42,72,6);
-  // 正面標誌
   c.fillStyle='#f57f17';c.font='bold 10px sans-serif';c.textAlign='center';
   c.fillText('⛑',50,38);
-  // 內襯（底部）
   c.beginPath();
   c.ellipse(50,56,30,5,0,0,Math.PI);
   c.fillStyle='rgba(0,0,0,0.08)';c.fill();
 }
 
-// ===== DRAW FUNCTION MAP (已更新) =====
+// ===== DRAW FUNCTION MAP =====
 var drawFns={
   '水壩':drawDam,
-  '石壆':drawStoneBarrier,
+  '石墩':drawStoneBollard,
   '水馬':drawWaterBarrier,
   '電塔':drawPylon,
   '棚架':drawScaffolding,
