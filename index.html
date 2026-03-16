@@ -223,16 +223,16 @@ var db = firebase.firestore();
 var ADMIN_NAME='lsy';
 var ADMIN_PW='lsy617';
 
-// ===== CORRECT ANSWERS =====
+// ===== CORRECT ANSWERS (已更新) =====
 var correctMap={
-  '水壩':'mass','金字塔':'mass','城堡':'mass',
-  '電塔':'frame','鞦韆架':'frame','摩天輪':'frame',
-  '隧道':'shell','飛機':'shell','雨傘':'shell'
+  '水壩':'mass','石壆':'mass','水馬':'mass',
+  '電塔':'frame','棚架':'frame','摩天輪':'frame',
+  '隧道':'shell','碗':'shell','安全帽':'shell'
 };
 var tagLabels={mass:'質量結構',frame:'支架結構',shell:'殼形結構'};
 var tagEmoji={mass:'🔴',frame:'🔵',shell:'🟢'};
 var tagCls={mass:'am',frame:'af',shell:'as'};
-var itemOrder=['水壩','金字塔','城堡','電塔','鞦韆架','摩天輪','隧道','飛機','雨傘'];
+var itemOrder=['水壩','石壆','水馬','電塔','棚架','摩天輪','隧道','碗','安全帽'];
 
 // ===== SUBMISSIONS (loaded from Firestore) =====
 var submissions=[];
@@ -265,6 +265,8 @@ async function deleteAllSubmissions(){
 }
 
 // ===== DRAWING FUNCTIONS =====
+
+// --- 水壩 (Mass) ---
 function drawDam(c){
   c.fillStyle='#90caf9';c.globalAlpha=.5;c.fillRect(5,35,28,48);c.globalAlpha=1;
   c.beginPath();c.moveTo(28,83);c.lineTo(36,18);c.lineTo(68,18);c.lineTo(82,83);c.closePath();
@@ -273,22 +275,67 @@ function drawDam(c){
   c.strokeStyle='#42a5f5';c.lineWidth=1.5;c.beginPath();
   for(var x=5;x<32;x+=10){c.moveTo(x,50);c.quadraticCurveTo(x+3,46,x+6,50);}c.stroke();
 }
-function drawPyramid(c){
-  c.beginPath();c.moveTo(50,10);c.lineTo(8,83);c.lineTo(92,83);c.closePath();
-  c.fillStyle='#e6b422';c.fill();c.strokeStyle='#b8860b';c.lineWidth=2;c.stroke();
-  c.globalAlpha=.3;c.beginPath();c.moveTo(50,10);c.lineTo(50,83);c.stroke();
-  c.beginPath();c.moveTo(50,10);c.lineTo(70,83);c.stroke();c.globalAlpha=1;
-  c.fillStyle='#d4a017';c.fillRect(3,83,94,4);
+
+// --- 石壆 (Mass) - 取代金字塔 ---
+function drawStoneBarrier(c){
+  // 主體 - 梯形石壆
+  c.beginPath();
+  c.moveTo(22,22);c.lineTo(78,22);c.lineTo(86,80);c.lineTo(14,80);
+  c.closePath();
+  c.fillStyle='#9e9e9e';c.fill();
+  c.strokeStyle='#757575';c.lineWidth=2;c.stroke();
+  // 頂蓋
+  c.fillStyle='#bdbdbd';
+  c.fillRect(18,18,64,6);
+  c.strokeStyle='#757575';c.lineWidth=1.5;c.strokeRect(18,18,64,6);
+  // 石紋 - 橫線
+  c.strokeStyle='#757575';c.lineWidth=1;
+  c.beginPath();c.moveTo(21,37);c.lineTo(79,37);c.stroke();
+  c.beginPath();c.moveTo(19,52);c.lineTo(82,52);c.stroke();
+  c.beginPath();c.moveTo(17,67);c.lineTo(84,67);c.stroke();
+  // 石紋 - 直線（磚塊效果）
+  c.beginPath();c.moveTo(50,22);c.lineTo(50,37);c.stroke();
+  c.beginPath();c.moveTo(35,37);c.lineTo(34,52);c.stroke();
+  c.beginPath();c.moveTo(65,37);c.lineTo(66,52);c.stroke();
+  c.beginPath();c.moveTo(50,52);c.lineTo(50,67);c.stroke();
+  c.beginPath();c.moveTo(30,67);c.lineTo(28,80);c.stroke();
+  c.beginPath();c.moveTo(68,67);c.lineTo(70,80);c.stroke();
+  // 地面
+  c.fillStyle='#795548';c.fillRect(5,80,90,5);
 }
-function drawCastle(c){
-  c.fillStyle='#9e9e9e';c.strokeStyle='#616161';c.lineWidth=2;
-  c.fillRect(20,40,60,43);c.strokeRect(20,40,60,43);
-  c.fillRect(12,28,18,55);c.strokeRect(12,28,18,55);
-  c.fillRect(70,28,18,55);c.strokeRect(70,28,18,55);
-  var bw=7;for(var x=12;x<30;x+=bw*2){c.fillRect(x,20,bw,8);c.strokeRect(x,20,bw,8);}
-  for(var x=70;x<88;x+=bw*2){c.fillRect(x,20,bw,8);c.strokeRect(x,20,bw,8);}
-  c.fillStyle='#5d4037';c.beginPath();c.arc(50,70,9,Math.PI,0);c.lineTo(59,83);c.lineTo(41,83);c.fill();
+
+// --- 水馬 (Mass) - 取代鞦韆架 ---
+function drawWaterBarrier(c){
+  // 主體 - 橙紅色梯形
+  c.beginPath();
+  c.moveTo(22,74);c.lineTo(28,20);c.lineTo(72,20);c.lineTo(78,74);
+  c.closePath();
+  c.fillStyle='#ff6d00';c.fill();
+  c.strokeStyle='#e65100';c.lineWidth=2;c.stroke();
+  // 白色反光條
+  c.fillStyle='#fff';
+  c.beginPath();
+  c.moveTo(24,38);c.lineTo(25,30);c.lineTo(75,30);c.lineTo(76,38);
+  c.closePath();c.fill();
+  c.beginPath();
+  c.moveTo(25,54);c.lineTo(26,46);c.lineTo(74,46);c.lineTo(75,54);
+  c.closePath();c.fill();
+  // 注水口
+  c.fillStyle='#424242';
+  c.beginPath();c.arc(50,20,6,Math.PI,0);c.fill();
+  c.fillStyle='#555';
+  c.fillRect(46,14,8,6);
+  c.strokeStyle='#e65100';c.lineWidth=1.5;c.strokeRect(46,14,8,6);
+  // 底座
+  c.fillStyle='#bf360c';
+  c.fillRect(18,74,64,6);
+  c.strokeStyle='#e65100';c.lineWidth=1.5;c.strokeRect(18,74,64,6);
+  // 「水」字標示
+  c.fillStyle='#fff';c.font='bold 11px sans-serif';c.textAlign='center';
+  c.fillText('水',50,68);
 }
+
+// --- 電塔 (Frame) ---
 function drawPylon(c){
   c.strokeStyle='#555';c.lineWidth=2;
   c.beginPath();c.moveTo(28,85);c.lineTo(43,8);c.stroke();
@@ -303,15 +350,51 @@ function drawPylon(c){
   c.fillStyle='#1565c0';[12,88].forEach(function(x){c.beginPath();c.arc(x,18,3,0,6.28);c.fill();});
   [18,82].forEach(function(x){c.beginPath();c.arc(x,34,3,0,6.28);c.fill();});
 }
-function drawSwing(c){
-  c.strokeStyle='#795548';c.lineWidth=3;
-  c.beginPath();c.moveTo(12,85);c.lineTo(50,12);c.lineTo(88,85);c.stroke();
-  c.strokeStyle='#8d6e63';c.lineWidth=1.8;
-  c.beginPath();c.moveTo(43,15);c.lineTo(36,66);c.stroke();
-  c.beginPath();c.moveTo(57,15);c.lineTo(64,66);c.stroke();
-  c.fillStyle='#4e342e';c.fillRect(33,66,34,5);
-  c.fillStyle='#795548';c.beginPath();c.arc(50,12,4,0,6.28);c.fill();
+
+// --- 棚架 (Frame) - 取代城堡 ---
+function drawScaffolding(c){
+  c.strokeStyle='#546e7a';c.lineWidth=2.5;
+  // 直柱
+  c.beginPath();c.moveTo(16,8);c.lineTo(16,88);c.stroke();
+  c.beginPath();c.moveTo(50,8);c.lineTo(50,88);c.stroke();
+  c.beginPath();c.moveTo(84,8);c.lineTo(84,88);c.stroke();
+  // 橫桿
+  c.lineWidth=2;
+  var rows=[12,38,62,86];
+  rows.forEach(function(y){
+    c.beginPath();c.moveTo(12,y);c.lineTo(88,y);c.stroke();
+  });
+  // 交叉支撐
+  c.strokeStyle='#78909c';c.lineWidth=1.5;
+  // 上層X
+  c.beginPath();c.moveTo(16,12);c.lineTo(50,38);c.stroke();
+  c.beginPath();c.moveTo(50,12);c.lineTo(16,38);c.stroke();
+  c.beginPath();c.moveTo(50,12);c.lineTo(84,38);c.stroke();
+  c.beginPath();c.moveTo(84,12);c.lineTo(50,38);c.stroke();
+  // 中層X
+  c.beginPath();c.moveTo(16,38);c.lineTo(50,62);c.stroke();
+  c.beginPath();c.moveTo(50,38);c.lineTo(16,62);c.stroke();
+  c.beginPath();c.moveTo(50,38);c.lineTo(84,62);c.stroke();
+  c.beginPath();c.moveTo(84,38);c.lineTo(50,62);c.stroke();
+  // 下層X
+  c.beginPath();c.moveTo(16,62);c.lineTo(50,86);c.stroke();
+  c.beginPath();c.moveTo(50,62);c.lineTo(16,86);c.stroke();
+  c.beginPath();c.moveTo(50,62);c.lineTo(84,86);c.stroke();
+  c.beginPath();c.moveTo(84,62);c.lineTo(50,86);c.stroke();
+  // 木板平台
+  c.fillStyle='#8d6e63';
+  c.fillRect(16,35,34,4);c.fillRect(50,35,34,4);
+  c.fillRect(16,59,34,4);c.fillRect(50,59,34,4);
+  // 接合點
+  c.fillStyle='#37474f';
+  rows.forEach(function(y){
+    [16,50,84].forEach(function(x){
+      c.beginPath();c.arc(x,y,2.5,0,6.28);c.fill();
+    });
+  });
 }
+
+// --- 摩天輪 (Frame) ---
 function drawFerrisWheel(c){
   var cx=50,cy=40,r=30;
   c.strokeStyle='#e91e63';c.lineWidth=2;c.beginPath();c.arc(cx,cy,r,0,6.28);c.stroke();
@@ -323,6 +406,8 @@ function drawFerrisWheel(c){
   c.beginPath();c.moveTo(cx,cy);c.lineTo(75,88);c.stroke();
   c.fillStyle='#e91e63';c.beginPath();c.arc(cx,cy,4,0,6.28);c.fill();
 }
+
+// --- 隧道 (Shell) ---
 function drawTunnel(c){
   c.beginPath();c.arc(50,74,42,Math.PI,0);c.lineTo(92,86);c.lineTo(8,86);c.closePath();
   c.fillStyle='#9e9e9e';c.fill();c.strokeStyle='#616161';c.lineWidth=2;c.stroke();
@@ -332,31 +417,77 @@ function drawTunnel(c){
   c.beginPath();c.moveTo(50,66);c.lineTo(50,86);c.stroke();c.setLineDash([]);
   c.fillStyle='#546e7a';c.fillRect(20,80,60,6);
 }
-function drawAirplane(c){
-  c.beginPath();c.moveTo(8,46);c.quadraticCurveTo(8,34,24,34);c.lineTo(78,34);
-  c.quadraticCurveTo(96,34,96,42);c.quadraticCurveTo(96,50,78,50);c.lineTo(24,50);
-  c.quadraticCurveTo(8,50,8,46);c.fillStyle='#eceff1';c.fill();c.strokeStyle='#607d8b';c.lineWidth=1.5;c.stroke();
-  c.fillStyle='#42a5f5';for(var x=28;x<=72;x+=7){c.beginPath();c.arc(x,40,2.2,0,6.28);c.fill();}
-  c.fillStyle='#b0bec5';c.beginPath();c.moveTo(38,50);c.lineTo(28,78);c.lineTo(58,78);c.lineTo(58,50);c.closePath();c.fill();c.strokeStyle='#607d8b';c.stroke();
-  c.beginPath();c.moveTo(14,34);c.lineTo(6,14);c.lineTo(24,14);c.lineTo(24,34);c.closePath();c.fill();c.stroke();
-  c.strokeStyle='#e53935';c.lineWidth=2;c.beginPath();c.moveTo(24,42);c.lineTo(88,42);c.stroke();
-}
-function drawUmbrella(c){
-  c.beginPath();c.arc(50,38,38,Math.PI,0);c.closePath();
-  c.fillStyle='#e53935';c.fill();c.strokeStyle='#b71c1c';c.lineWidth=2;c.stroke();
-  var seg=6;c.beginPath();
-  for(var i=0;i<seg;i++){var x1=12+i*(76/seg),x2=12+(i+1)*(76/seg),mx=(x1+x2)/2;c.moveTo(x1,38);c.quadraticCurveTo(mx,46,x2,38);}
-  c.strokeStyle='#b71c1c';c.lineWidth=1.5;c.stroke();
-  c.globalAlpha=.18;c.fillStyle='#fff';
-  for(var i=0;i<seg;i+=2){var x1=12+i*(76/seg),x2=12+(i+1)*(76/seg);c.beginPath();c.moveTo(50,4);c.lineTo(x1,38);c.lineTo(x2,38);c.closePath();c.fill();}
-  c.globalAlpha=1;c.strokeStyle='#c62828';c.lineWidth=1;
-  for(var i=1;i<seg;i++){var x=12+i*(76/seg);c.beginPath();c.moveTo(50,4);c.lineTo(x,38);c.stroke();}
-  c.strokeStyle='#5d4037';c.lineWidth=3;c.beginPath();c.moveTo(50,10);c.lineTo(50,82);c.stroke();
-  c.lineCap='round';c.beginPath();c.arc(42,82,8,0,Math.PI*.85);c.stroke();
-  c.fillStyle='#5d4037';c.beginPath();c.arc(50,4,2.5,0,6.28);c.fill();
+
+// --- 碗 (Shell) - 取代飛機 ---
+function drawBowl(c){
+  // 碗身
+  c.beginPath();
+  c.moveTo(10,32);
+  c.quadraticCurveTo(14,80,50,84);
+  c.quadraticCurveTo(86,80,90,32);
+  c.closePath();
+  c.fillStyle='#e0e0e0';c.fill();
+  c.strokeStyle='#9e9e9e';c.lineWidth=2.5;c.stroke();
+  // 碗口（橢圓）
+  c.beginPath();
+  c.ellipse(50,32,40,9,0,0,Math.PI*2);
+  c.fillStyle='#f5f5f5';c.fill();
+  c.strokeStyle='#9e9e9e';c.lineWidth=2;c.stroke();
+  // 內部陰影
+  c.beginPath();
+  c.ellipse(50,34,32,6,0,0,Math.PI);
+  c.fillStyle='rgba(0,0,0,0.06)';c.fill();
+  // 裝飾線條
+  c.strokeStyle='#bdbdbd';c.lineWidth=1.2;
+  c.beginPath();c.ellipse(50,50,30,4,0,0.1,Math.PI-0.1);c.stroke();
+  c.beginPath();c.ellipse(50,64,20,3,0,0.1,Math.PI-0.1);c.stroke();
+  // 碗底
+  c.fillStyle='#bdbdbd';
+  c.beginPath();c.ellipse(50,84,10,3,0,0,Math.PI*2);c.fill();
+  c.strokeStyle='#9e9e9e';c.lineWidth=1.5;c.stroke();
 }
 
-var drawFns={'水壩':drawDam,'金字塔':drawPyramid,'城堡':drawCastle,'電塔':drawPylon,'鞦韆架':drawSwing,'摩天輪':drawFerrisWheel,'隧道':drawTunnel,'飛機':drawAirplane,'雨傘':drawUmbrella};
+// --- 安全帽 (Shell) - 取代雨傘 ---
+function drawHelmet(c){
+  // 主體圓頂
+  c.beginPath();
+  c.arc(50,48,36,Math.PI,0);
+  c.closePath();
+  c.fillStyle='#fdd835';c.fill();
+  c.strokeStyle='#f9a825';c.lineWidth=2.5;c.stroke();
+  // 帽簷
+  c.beginPath();
+  c.moveTo(8,48);c.lineTo(92,48);c.lineTo(88,58);c.lineTo(12,58);
+  c.closePath();
+  c.fillStyle='#fbc02d';c.fill();
+  c.strokeStyle='#f9a825';c.lineWidth=2;c.stroke();
+  // 頂部脊線
+  c.strokeStyle='#f9a825';c.lineWidth=3;
+  c.beginPath();c.moveTo(32,22);c.lineTo(68,22);c.stroke();
+  // 帽帶
+  c.fillStyle='rgba(0,0,0,0.12)';
+  c.fillRect(14,42,72,6);
+  // 正面標誌
+  c.fillStyle='#f57f17';c.font='bold 10px sans-serif';c.textAlign='center';
+  c.fillText('⛑',50,38);
+  // 內襯（底部）
+  c.beginPath();
+  c.ellipse(50,56,30,5,0,0,Math.PI);
+  c.fillStyle='rgba(0,0,0,0.08)';c.fill();
+}
+
+// ===== DRAW FUNCTION MAP (已更新) =====
+var drawFns={
+  '水壩':drawDam,
+  '石壆':drawStoneBarrier,
+  '水馬':drawWaterBarrier,
+  '電塔':drawPylon,
+  '棚架':drawScaffolding,
+  '摩天輪':drawFerrisWheel,
+  '隧道':drawTunnel,
+  '碗':drawBowl,
+  '安全帽':drawHelmet
+};
 
 // ===== QUIZ STATE =====
 var quizItems=[];
