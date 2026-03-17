@@ -239,6 +239,7 @@ var submissions=[];
 
 var currentUser='';
 var hasSubmitted=false;
+var sel=new Array(9).fill(null);
 var sortCol='score';
 var sortDir=-1;
 
@@ -356,118 +357,65 @@ function drawScaffolding(c){
   });
 }
 
-// --- 太空館 (Shell) ---
+// --- 太空館 (Shell) - 白色半球形建築，只有圓頂 ---
 function drawSpaceMuseum(c){
-  // Sky background hint
-  c.fillStyle='#e3f2fd';
-  c.fillRect(0,0,100,100);
+  var cx=50, cy=72, r=40;
 
-  // Ground
-  c.fillStyle='#bdbdbd';
-  c.fillRect(0,78,100,22);
-  c.strokeStyle='#9e9e9e';c.lineWidth=1;
-  c.beginPath();c.moveTo(0,78);c.lineTo(100,78);c.stroke();
-
-  // Base building - rectangular block
-  c.fillStyle='#f5f0e8';
-  c.fillRect(10,58,80,20);
-  c.strokeStyle='#bfa888';c.lineWidth=1.5;
-  c.strokeRect(10,58,80,20);
-
-  // Base building shadow strip
-  c.fillStyle='#e8ddd0';
-  c.fillRect(10,58,80,4);
-
-  // Windows on base
-  c.fillStyle='#90caf9';
-  for(var wx=18;wx<=78;wx+=12){
-    c.fillRect(wx,64,6,8);
-    c.strokeStyle='#78909c';c.lineWidth=0.8;
-    c.strokeRect(wx,64,6,8);
-  }
-
-  // Entrance
-  c.fillStyle='#546e7a';
-  c.fillRect(42,66,16,12);
-  c.strokeStyle='#37474f';c.lineWidth=1;
-  c.strokeRect(42,66,16,12);
-  // Entrance inner
-  c.fillStyle='#37474f';
-  c.fillRect(44,68,12,10);
-
-  // The dome (hemisphere) - the iconic feature
-  var domeCx=50, domeCy=58, domeR=32;
-  
-  // Dome shadow on ground
+  // Dome body - white with subtle gradient
   c.beginPath();
-  c.ellipse(50,60,34,4,0,0,Math.PI*2);
-  c.fillStyle='rgba(0,0,0,0.08)';
-  c.fill();
-
-  // Dome body
-  c.beginPath();
-  c.arc(domeCx,domeCy,domeR,Math.PI,0);
+  c.arc(cx,cy,r,Math.PI,0);
   c.closePath();
-  var domeGrad=c.createRadialGradient(42,38,5,domeCx,domeCy,domeR);
-  domeGrad.addColorStop(0,'#d4a76a');
-  domeGrad.addColorStop(0.4,'#c49660');
-  domeGrad.addColorStop(0.7,'#b8895a');
-  domeGrad.addColorStop(1,'#a07040');
-  c.fillStyle=domeGrad;
+  var grad=c.createRadialGradient(cx-10,cy-22,5,cx,cy,r);
+  grad.addColorStop(0,'#ffffff');
+  grad.addColorStop(0.3,'#f8f8f8');
+  grad.addColorStop(0.6,'#eeeeee');
+  grad.addColorStop(0.85,'#e0e0e0');
+  grad.addColorStop(1,'#d0d0d0');
+  c.fillStyle=grad;
   c.fill();
-  c.strokeStyle='#8d6e53';c.lineWidth=2;
+  c.strokeStyle='#b0b0b0';c.lineWidth=2;
   c.stroke();
 
-  // Dome highlight (shine)
+  // Dome highlight (top-left shine)
   c.beginPath();
-  c.arc(42,40,12,Math.PI,0);
-  c.fillStyle='rgba(255,255,255,0.18)';
-  c.fill();
+  c.arc(cx-12,cy-16,16,Math.PI*1.15,Math.PI*1.85);
+  c.strokeStyle='rgba(255,255,255,0.95)';
+  c.lineWidth=3.5;
+  c.stroke();
 
-  // Dome grid lines (meridians) for texture
-  c.strokeStyle='rgba(0,0,0,0.1)';c.lineWidth=0.8;
-  // Vertical arcs
-  for(var a=-2;a<=2;a++){
-    var offsetX=a*10;
+  // Dome panel lines (vertical meridians) - subtle
+  c.strokeStyle='rgba(0,0,0,0.07)';c.lineWidth=0.8;
+  for(var a=-3;a<=3;a++){
+    var angle=a*0.22;
     c.beginPath();
-    c.moveTo(domeCx+offsetX,domeCy);
-    c.quadraticCurveTo(domeCx+offsetX*0.6, domeCy-domeR*0.9, domeCx, domeCy-domeR+2);
+    for(var t=0;t<=Math.PI;t+=0.05){
+      var px=cx+Math.sin(angle)*r*Math.cos(t);
+      var py=cy-r*Math.sin(t);
+      if(t===0)c.moveTo(px,py);else c.lineTo(px,py);
+    }
     c.stroke();
   }
-  // Horizontal arcs
-  for(var hh=10;hh<=25;hh+=8){
-    var hw=Math.sqrt(domeR*domeR-hh*hh);
+
+  // Dome horizontal rings
+  c.strokeStyle='rgba(0,0,0,0.06)';c.lineWidth=0.8;
+  for(var ring=10;ring<=34;ring+=8){
+    var ringW=Math.sqrt(r*r-ring*ring);
     c.beginPath();
-    c.ellipse(domeCx, domeCy-hh, hw, hw*0.15, 0, Math.PI, 0);
+    c.ellipse(cx,cy-ring,ringW,ringW*0.12,0,Math.PI,0);
     c.stroke();
   }
 
   // Dome base rim
-  c.fillStyle='#8d6e53';
-  c.fillRect(domeCx-domeR,domeCy-2,domeR*2,3);
+  c.fillStyle='#bbb';
+  c.fillRect(cx-r,cy-1,r*2,3);
 
-  // Small flag/antenna on top
-  c.strokeStyle='#666';c.lineWidth=1.5;
-  c.beginPath();c.moveTo(50,26);c.lineTo(50,20);c.stroke();
-  c.fillStyle='#e53935';
-  c.beginPath();c.arc(50,19,2,0,Math.PI*2);c.fill();
-
-  // Ground tiles
-  c.strokeStyle='#aaa';c.lineWidth=0.5;
-  for(var gx=10;gx<100;gx+=15){
-    c.beginPath();c.moveTo(gx,78);c.lineTo(gx,92);c.stroke();
-  }
-  c.beginPath();c.moveTo(0,85);c.lineTo(100,85);c.stroke();
-
-  // Label plaque
-  c.fillStyle='rgba(255,255,255,0.7)';
-  c.fillRect(28,82,44,8);
-  c.strokeStyle='#8d6e53';c.lineWidth=0.8;
-  c.strokeRect(28,82,44,8);
-  c.fillStyle='#5d4037';
-  c.font='bold 6px sans-serif';
-  c.textAlign='center';
-  c.fillText('SPACE MUSEUM',50,88);
+  // Small top cap
+  c.fillStyle='#ddd';
+  c.beginPath();
+  c.arc(cx,cy-r+1,3.5,0,Math.PI*2);
+  c.fill();
+  c.strokeStyle='#aaa';c.lineWidth=1;
+  c.stroke();
 }
 
 // --- 隧道 (Shell) ---
@@ -524,7 +472,6 @@ var drawFns={
 
 // ===== QUIZ STATE =====
 var quizItems=[];
-var sel=new Array(9).fill(null);
 
 // ===== PASSWORD TOGGLE =====
 function onNameInput(){
