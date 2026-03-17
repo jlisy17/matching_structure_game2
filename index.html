@@ -226,13 +226,13 @@ var ADMIN_PW='lsy617';
 // ===== CORRECT ANSWERS =====
 var correctMap={
   '水壩':'mass','石墩':'mass','水馬':'mass',
-  '電塔':'frame','棚架':'frame','帳篷':'frame',
+  '電塔':'frame','棚架':'frame','太空館':'shell',
   '隧道':'shell','碗':'shell','安全帽':'shell'
 };
 var tagLabels={mass:'質量結構',frame:'支架結構',shell:'殼形結構'};
 var tagEmoji={mass:'🔴',frame:'🔵',shell:'🟢'};
 var tagCls={mass:'am',frame:'af',shell:'as'};
-var itemOrder=['水壩','石墩','水馬','電塔','棚架','帳篷','隧道','碗','安全帽'];
+var itemOrder=['水壩','石墩','水馬','電塔','棚架','太空館','隧道','碗','安全帽'];
 
 // ===== SUBMISSIONS (loaded from Firestore) =====
 var submissions=[];
@@ -356,74 +356,118 @@ function drawScaffolding(c){
   });
 }
 
-// --- 帳篷 (Frame) ---
-function drawTent(c){
-  // 地面
-  c.fillStyle='#a5d6a7';c.fillRect(0,78,100,22);
-  c.strokeStyle='#66bb6a';c.lineWidth=1;
+// --- 太空館 (Shell) ---
+function drawSpaceMuseum(c){
+  // Sky background hint
+  c.fillStyle='#e3f2fd';
+  c.fillRect(0,0,100,100);
+
+  // Ground
+  c.fillStyle='#bdbdbd';
+  c.fillRect(0,78,100,22);
+  c.strokeStyle='#9e9e9e';c.lineWidth=1;
   c.beginPath();c.moveTo(0,78);c.lineTo(100,78);c.stroke();
 
-  // 帳篷布 - 左面
-  c.beginPath();
-  c.moveTo(50,12);c.lineTo(10,76);c.lineTo(50,76);c.closePath();
-  var gL=c.createLinearGradient(10,12,50,76);
-  gL.addColorStop(0,'#ef5350');gL.addColorStop(1,'#e53935');
-  c.fillStyle=gL;c.fill();
-  c.strokeStyle='#c62828';c.lineWidth=2;c.stroke();
+  // Base building - rectangular block
+  c.fillStyle='#f5f0e8';
+  c.fillRect(10,58,80,20);
+  c.strokeStyle='#bfa888';c.lineWidth=1.5;
+  c.strokeRect(10,58,80,20);
 
-  // 帳篷布 - 右面
-  c.beginPath();
-  c.moveTo(50,12);c.lineTo(90,76);c.lineTo(50,76);c.closePath();
-  var gR=c.createLinearGradient(50,12,90,76);
-  gR.addColorStop(0,'#ef5350');gR.addColorStop(1,'#d32f2f');
-  c.fillStyle=gR;c.fill();
-  c.strokeStyle='#c62828';c.lineWidth=2;c.stroke();
+  // Base building shadow strip
+  c.fillStyle='#e8ddd0';
+  c.fillRect(10,58,80,4);
 
-  // 帳篷入口（拱形）
+  // Windows on base
+  c.fillStyle='#90caf9';
+  for(var wx=18;wx<=78;wx+=12){
+    c.fillRect(wx,64,6,8);
+    c.strokeStyle='#78909c';c.lineWidth=0.8;
+    c.strokeRect(wx,64,6,8);
+  }
+
+  // Entrance
+  c.fillStyle='#546e7a';
+  c.fillRect(42,66,16,12);
+  c.strokeStyle='#37474f';c.lineWidth=1;
+  c.strokeRect(42,66,16,12);
+  // Entrance inner
+  c.fillStyle='#37474f';
+  c.fillRect(44,68,12,10);
+
+  // The dome (hemisphere) - the iconic feature
+  var domeCx=50, domeCy=58, domeR=32;
+  
+  // Dome shadow on ground
   c.beginPath();
-  c.moveTo(36,76);
-  c.quadraticCurveTo(36,44,50,38);
-  c.quadraticCurveTo(64,44,64,76);
+  c.ellipse(50,60,34,4,0,0,Math.PI*2);
+  c.fillStyle='rgba(0,0,0,0.08)';
+  c.fill();
+
+  // Dome body
+  c.beginPath();
+  c.arc(domeCx,domeCy,domeR,Math.PI,0);
   c.closePath();
-  c.fillStyle='#37474f';c.fill();
-  c.strokeStyle='#263238';c.lineWidth=1.5;c.stroke();
+  var domeGrad=c.createRadialGradient(42,38,5,domeCx,domeCy,domeR);
+  domeGrad.addColorStop(0,'#d4a76a');
+  domeGrad.addColorStop(0.4,'#c49660');
+  domeGrad.addColorStop(0.7,'#b8895a');
+  domeGrad.addColorStop(1,'#a07040');
+  c.fillStyle=domeGrad;
+  c.fill();
+  c.strokeStyle='#8d6e53';c.lineWidth=2;
+  c.stroke();
 
-  // 入口內部陰影
+  // Dome highlight (shine)
   c.beginPath();
-  c.moveTo(40,76);
-  c.quadraticCurveTo(40,50,50,44);
-  c.quadraticCurveTo(60,50,60,76);
-  c.closePath();
-  c.fillStyle='#263238';c.fill();
+  c.arc(42,40,12,Math.PI,0);
+  c.fillStyle='rgba(255,255,255,0.18)';
+  c.fill();
 
-  // 支架桿 - 頂部
-  c.strokeStyle='#795548';c.lineWidth=3;
-  c.beginPath();c.moveTo(50,8);c.lineTo(50,16);c.stroke();
+  // Dome grid lines (meridians) for texture
+  c.strokeStyle='rgba(0,0,0,0.1)';c.lineWidth=0.8;
+  // Vertical arcs
+  for(var a=-2;a<=2;a++){
+    var offsetX=a*10;
+    c.beginPath();
+    c.moveTo(domeCx+offsetX,domeCy);
+    c.quadraticCurveTo(domeCx+offsetX*0.6, domeCy-domeR*0.9, domeCx, domeCy-domeR+2);
+    c.stroke();
+  }
+  // Horizontal arcs
+  for(var hh=10;hh<=25;hh+=8){
+    var hw=Math.sqrt(domeR*domeR-hh*hh);
+    c.beginPath();
+    c.ellipse(domeCx, domeCy-hh, hw, hw*0.15, 0, Math.PI, 0);
+    c.stroke();
+  }
 
-  // 頂部裝飾球
-  c.fillStyle='#ffd54f';
-  c.beginPath();c.arc(50,8,3,0,Math.PI*2);c.fill();
-  c.strokeStyle='#f9a825';c.lineWidth=1;c.stroke();
+  // Dome base rim
+  c.fillStyle='#8d6e53';
+  c.fillRect(domeCx-domeR,domeCy-2,domeR*2,3);
 
-  // 支架桿 - 左右可見的斜桿
-  c.strokeStyle='#795548';c.lineWidth=2;
-  c.beginPath();c.moveTo(50,12);c.lineTo(8,78);c.stroke();
-  c.beginPath();c.moveTo(50,12);c.lineTo(92,78);c.stroke();
+  // Small flag/antenna on top
+  c.strokeStyle='#666';c.lineWidth=1.5;
+  c.beginPath();c.moveTo(50,26);c.lineTo(50,20);c.stroke();
+  c.fillStyle='#e53935';
+  c.beginPath();c.arc(50,19,2,0,Math.PI*2);c.fill();
 
-  // 拉繩
-  c.strokeStyle='#9e9e9e';c.lineWidth=1;c.setLineDash([3,3]);
-  c.beginPath();c.moveTo(50,12);c.lineTo(4,78);c.stroke();
-  c.beginPath();c.moveTo(50,12);c.lineTo(96,78);c.stroke();
-  c.setLineDash([]);
+  // Ground tiles
+  c.strokeStyle='#aaa';c.lineWidth=0.5;
+  for(var gx=10;gx<100;gx+=15){
+    c.beginPath();c.moveTo(gx,78);c.lineTo(gx,92);c.stroke();
+  }
+  c.beginPath();c.moveTo(0,85);c.lineTo(100,85);c.stroke();
 
-  // 拉繩地釘
-  c.fillStyle='#757575';
-  c.beginPath();c.moveTo(4,78);c.lineTo(2,84);c.lineTo(6,84);c.closePath();c.fill();
-  c.beginPath();c.moveTo(96,78);c.lineTo(94,84);c.lineTo(98,84);c.closePath();c.fill();
-
-  // 帳篷底部橫桿暗示
-  c.strokeStyle='#795548';c.lineWidth=1.5;
-  c.beginPath();c.moveTo(10,76);c.lineTo(90,76);c.stroke();
+  // Label plaque
+  c.fillStyle='rgba(255,255,255,0.7)';
+  c.fillRect(28,82,44,8);
+  c.strokeStyle='#8d6e53';c.lineWidth=0.8;
+  c.strokeRect(28,82,44,8);
+  c.fillStyle='#5d4037';
+  c.font='bold 6px sans-serif';
+  c.textAlign='center';
+  c.fillText('SPACE MUSEUM',50,88);
 }
 
 // --- 隧道 (Shell) ---
@@ -472,7 +516,7 @@ var drawFns={
   '水馬':drawWaterBarrier,
   '電塔':drawPylon,
   '棚架':drawScaffolding,
-  '帳篷':drawTent,
+  '太空館':drawSpaceMuseum,
   '隧道':drawTunnel,
   '碗':drawBowl,
   '安全帽':drawHelmet
