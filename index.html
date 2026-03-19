@@ -277,116 +277,31 @@ function drawDam(c){
   for(var x=5;x<32;x+=10){c.moveTo(x,50);c.quadraticCurveTo(x+3,46,x+6,50);}c.stroke();
 }
 
-// --- 石墩 (Mass) - Based on real concrete bollard photo ---
+// --- 石墩 (Mass) ---
 function drawStoneBollard(c){
-  // Ground / shadow
   c.fillStyle='#555';
-  c.beginPath();
-  c.ellipse(50,86,38,5,0,0,Math.PI*2);
-  c.fill();
-
-  // Front face - trapezoid shape (wider at bottom, narrower at top)
-  var topL=30, topR=70, topY=28;
-  var botL=18, botR=82, botY=84;
-
-  // Right side face (3D perspective)
-  c.beginPath();
-  c.moveTo(topR,topY);
-  c.lineTo(topR+8,topY-6);
-  c.lineTo(botR+4,botY-4);
-  c.lineTo(botR,botY);
-  c.closePath();
-  c.fillStyle='#8a8a8a';
-  c.fill();
-  c.strokeStyle='#6a6a6a';c.lineWidth=1.2;c.stroke();
-
-  // Top face (3D perspective)
-  c.beginPath();
-  c.moveTo(topL,topY);
-  c.lineTo(topL+6,topY-7);
-  c.lineTo(topR+8,topY-6);
-  c.lineTo(topR,topY);
-  c.closePath();
-  c.fillStyle='#b8b8b8';
-  c.fill();
-  c.strokeStyle='#8a8a8a';c.lineWidth=1.2;c.stroke();
-
-  // Main front face - trapezoid
-  c.beginPath();
-  c.moveTo(topL,topY);
-  c.lineTo(topR,topY);
-  c.lineTo(botR,botY);
-  c.lineTo(botL,botY);
-  c.closePath();
-
-  // Concrete gradient
+  c.beginPath();c.ellipse(50,86,38,5,0,0,Math.PI*2);c.fill();
+  var topL=30,topR=70,topY=28;
+  var botL=18,botR=82,botY=84;
+  c.beginPath();c.moveTo(topR,topY);c.lineTo(topR+8,topY-6);c.lineTo(botR+4,botY-4);c.lineTo(botR,botY);c.closePath();
+  c.fillStyle='#8a8a8a';c.fill();c.strokeStyle='#6a6a6a';c.lineWidth=1.2;c.stroke();
+  c.beginPath();c.moveTo(topL,topY);c.lineTo(topL+6,topY-7);c.lineTo(topR+8,topY-6);c.lineTo(topR,topY);c.closePath();
+  c.fillStyle='#b8b8b8';c.fill();c.strokeStyle='#8a8a8a';c.lineWidth=1.2;c.stroke();
+  c.beginPath();c.moveTo(topL,topY);c.lineTo(topR,topY);c.lineTo(botR,botY);c.lineTo(botL,botY);c.closePath();
   var grad=c.createLinearGradient(0,topY,0,botY);
-  grad.addColorStop(0,'#b0b0b0');
-  grad.addColorStop(0.3,'#a8a8a8');
-  grad.addColorStop(0.7,'#959595');
-  grad.addColorStop(1,'#888888');
-  c.fillStyle=grad;
-  c.fill();
-  c.strokeStyle='#6e6e6e';c.lineWidth=2;c.stroke();
-
-  // Concrete texture - subtle speckles
+  grad.addColorStop(0,'#b0b0b0');grad.addColorStop(0.3,'#a8a8a8');grad.addColorStop(0.7,'#959595');grad.addColorStop(1,'#888888');
+  c.fillStyle=grad;c.fill();c.strokeStyle='#6e6e6e';c.lineWidth=2;c.stroke();
   c.fillStyle='rgba(0,0,0,0.05)';
-  var rng=function(s){return function(){s=(s*9301+49297)%233280;return s/233280;}};
-  var rand=rng(42);
-  for(var i=0;i<40;i++){
-    var px=botL+4+rand()*(botR-botL-8);
-    var py=topY+4+rand()*(botY-topY-8);
-    // Check if point is inside trapezoid roughly
-    var frac=(py-topY)/(botY-topY);
-    var lx=topL+(botL-topL)*frac;
-    var rx=topR+(botR-topR)*frac;
-    if(px>lx+3 && px<rx-3){
-      c.beginPath();
-      c.arc(px,py,rand()*1.5+0.5,0,Math.PI*2);
-      c.fill();
-    }
-  }
-
-  // Darker patches for concrete look
-  c.fillStyle='rgba(0,0,0,0.04)';
-  c.beginPath();c.ellipse(42,55,12,8,0.2,0,Math.PI*2);c.fill();
-  c.beginPath();c.ellipse(62,68,10,6,-0.1,0,Math.PI*2);c.fill();
-
-  // Circular hole in center
-  var holeX=50, holeY=58, holeR=7;
-  // Hole shadow
-  c.beginPath();
-  c.arc(holeX,holeY,holeR+1,0,Math.PI*2);
-  c.fillStyle='rgba(0,0,0,0.15)';
-  c.fill();
-  // Hole
-  c.beginPath();
-  c.arc(holeX,holeY,holeR,0,Math.PI*2);
-  c.fillStyle='#3a3a3a';
-  c.fill();
-  // Hole inner ring
-  c.beginPath();
-  c.arc(holeX,holeY,holeR,0,Math.PI*2);
-  c.strokeStyle='#555';c.lineWidth=1.5;c.stroke();
-  // Hole depth highlight
-  c.beginPath();
-  c.arc(holeX+1,holeY-1,holeR-2,0,Math.PI*2);
-  c.fillStyle='rgba(255,255,255,0.06)';
-  c.fill();
-
-  // Edge highlight on front face (top-left)
-  c.strokeStyle='rgba(255,255,255,0.2)';c.lineWidth=1.5;
-  c.beginPath();
-  c.moveTo(topL+2,topY+2);
-  c.lineTo(topR-2,topY+2);
-  c.stroke();
-
-  // Bottom edge line
-  c.strokeStyle='rgba(0,0,0,0.15)';c.lineWidth=1.5;
-  c.beginPath();
-  c.moveTo(botL+2,botY-1);
-  c.lineTo(botR-2,botY-1);
-  c.stroke();
+  var rng=function(s){return function(){s=(s*9301+49297)%233280;return s/233280;}};var rand=rng(42);
+  for(var i=0;i<40;i++){var px=botL+4+rand()*(botR-botL-8);var py=topY+4+rand()*(botY-topY-8);var frac=(py-topY)/(botY-topY);var lx=topL+(botL-topL)*frac;var rx=topR+(botR-topR)*frac;if(px>lx+3&&px<rx-3){c.beginPath();c.arc(px,py,rand()*1.5+0.5,0,Math.PI*2);c.fill();}}
+  c.fillStyle='rgba(0,0,0,0.04)';c.beginPath();c.ellipse(42,55,12,8,0.2,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(62,68,10,6,-0.1,0,Math.PI*2);c.fill();
+  var holeX=50,holeY=58,holeR=7;
+  c.beginPath();c.arc(holeX,holeY,holeR+1,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.15)';c.fill();
+  c.beginPath();c.arc(holeX,holeY,holeR,0,Math.PI*2);c.fillStyle='#3a3a3a';c.fill();
+  c.beginPath();c.arc(holeX,holeY,holeR,0,Math.PI*2);c.strokeStyle='#555';c.lineWidth=1.5;c.stroke();
+  c.beginPath();c.arc(holeX+1,holeY-1,holeR-2,0,Math.PI*2);c.fillStyle='rgba(255,255,255,0.06)';c.fill();
+  c.strokeStyle='rgba(255,255,255,0.2)';c.lineWidth=1.5;c.beginPath();c.moveTo(topL+2,topY+2);c.lineTo(topR-2,topY+2);c.stroke();
+  c.strokeStyle='rgba(0,0,0,0.15)';c.lineWidth=1.5;c.beginPath();c.moveTo(botL+2,botY-1);c.lineTo(botR-2,botY-1);c.stroke();
 }
 
 // --- 水馬 (Mass) ---
@@ -397,12 +312,9 @@ function drawWaterBarrier(c){
   c.beginPath();c.moveTo(24,38);c.lineTo(25,30);c.lineTo(75,30);c.lineTo(76,38);c.closePath();c.fill();
   c.beginPath();c.moveTo(25,54);c.lineTo(26,46);c.lineTo(74,46);c.lineTo(75,54);c.closePath();c.fill();
   c.fillStyle='#424242';c.beginPath();c.arc(50,20,6,Math.PI,0);c.fill();
-  c.fillStyle='#555';c.fillRect(46,14,8,6);
-  c.strokeStyle='#e65100';c.lineWidth=1.5;c.strokeRect(46,14,8,6);
-  c.fillStyle='#bf360c';c.fillRect(18,74,64,6);
-  c.strokeStyle='#e65100';c.lineWidth=1.5;c.strokeRect(18,74,64,6);
-  c.fillStyle='#fff';c.font='bold 11px sans-serif';c.textAlign='center';
-  c.fillText('水',50,68);
+  c.fillStyle='#555';c.fillRect(46,14,8,6);c.strokeStyle='#e65100';c.lineWidth=1.5;c.strokeRect(46,14,8,6);
+  c.fillStyle='#bf360c';c.fillRect(18,74,64,6);c.strokeStyle='#e65100';c.lineWidth=1.5;c.strokeRect(18,74,64,6);
+  c.fillStyle='#fff';c.font='bold 11px sans-serif';c.textAlign='center';c.fillText('水',50,68);
 }
 
 // --- 電塔 (Frame) ---
@@ -447,14 +359,12 @@ function drawScaffolding(c){
   c.fillRect(16,35,34,4);c.fillRect(50,35,34,4);
   c.fillRect(16,59,34,4);c.fillRect(50,59,34,4);
   c.fillStyle='#37474f';
-  rows.forEach(function(y){
-    [16,50,84].forEach(function(x){c.beginPath();c.arc(x,y,2.5,0,6.28);c.fill();});
-  });
+  rows.forEach(function(y){[16,50,84].forEach(function(x){c.beginPath();c.arc(x,y,2.5,0,6.28);c.fill();});});
 }
 
-// --- 香港太空館 (Shell) ---
+// --- 香港太空館 (Shell) - 已移除圓頂上的點 ---
 function drawSpaceMuseum(c){
-  var cx=50, cy=72, r=40;
+  var cx=50,cy=72,r=40;
   c.beginPath();
   c.arc(cx,cy,r,Math.PI,0);
   c.closePath();
@@ -468,11 +378,13 @@ function drawSpaceMuseum(c){
   c.fill();
   c.strokeStyle='#b0b0b0';c.lineWidth=2;
   c.stroke();
+  // Highlight arc
   c.beginPath();
   c.arc(cx-12,cy-16,16,Math.PI*1.15,Math.PI*1.85);
   c.strokeStyle='rgba(255,255,255,0.95)';
   c.lineWidth=3.5;
   c.stroke();
+  // Vertical meridian lines
   c.strokeStyle='rgba(0,0,0,0.07)';c.lineWidth=0.8;
   for(var a=-3;a<=3;a++){
     var angle=a*0.22;
@@ -484,6 +396,7 @@ function drawSpaceMuseum(c){
     }
     c.stroke();
   }
+  // Horizontal ring lines
   c.strokeStyle='rgba(0,0,0,0.06)';c.lineWidth=0.8;
   for(var ring=10;ring<=34;ring+=8){
     var ringW=Math.sqrt(r*r-ring*ring);
@@ -491,14 +404,9 @@ function drawSpaceMuseum(c){
     c.ellipse(cx,cy-ring,ringW,ringW*0.12,0,Math.PI,0);
     c.stroke();
   }
+  // Base line
   c.fillStyle='#bbb';
   c.fillRect(cx-r,cy-1,r*2,3);
-  c.fillStyle='#ddd';
-  c.beginPath();
-  c.arc(cx,cy-r+1,3.5,0,Math.PI*2);
-  c.fill();
-  c.strokeStyle='#aaa';c.lineWidth=1;
-  c.stroke();
 }
 
 // --- 隧道 (Shell) ---
@@ -542,15 +450,9 @@ function drawHelmet(c){
 
 // ===== DRAW FUNCTION MAP =====
 var drawFns={
-  '水壩':drawDam,
-  '石墩':drawStoneBollard,
-  '水馬':drawWaterBarrier,
-  '電塔':drawPylon,
-  '棚架':drawScaffolding,
-  '香港太空館':drawSpaceMuseum,
-  '隧道':drawTunnel,
-  '碗':drawBowl,
-  '安全帽':drawHelmet
+  '水壩':drawDam,'石墩':drawStoneBollard,'水馬':drawWaterBarrier,
+  '電塔':drawPylon,'棚架':drawScaffolding,'香港太空館':drawSpaceMuseum,
+  '隧道':drawTunnel,'碗':drawBowl,'安全帽':drawHelmet
 };
 
 // ===== QUIZ STATE =====
@@ -572,18 +474,13 @@ function togglePw(){
 
 // ===== LOGIN =====
 document.getElementById('nameInput').addEventListener('keydown',function(e){
-  if(e.key==='Enter'){
-    var name=document.getElementById('nameInput').value.trim();
-    if(name===ADMIN_NAME){document.getElementById('pwInput').focus();}
-    else login();
-  }
+  if(e.key==='Enter'){var name=document.getElementById('nameInput').value.trim();if(name===ADMIN_NAME){document.getElementById('pwInput').focus();}else login();}
 });
 document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')login();});
 
 function login(){
   var name=document.getElementById('nameInput').value.trim();
   if(!name){document.getElementById('loginErr').textContent='⚠️ 請輸入名字';return;}
-
   if(name===ADMIN_NAME){
     var pw=document.getElementById('pwInput').value;
     if(pw!==ADMIN_PW){document.getElementById('loginErr').textContent='⚠️ 管理員密碼錯誤';return;}
@@ -618,33 +515,16 @@ function showModal(icon,title,msg,buttons,extraHtml){
   document.getElementById('modalTitle').textContent=title;
   document.getElementById('modalMsg').textContent=msg;
   document.getElementById('modalExtra').innerHTML=extraHtml||'';
-  var btnRow=document.getElementById('modalBtns');
-  btnRow.innerHTML='';
-  if(!buttons){
-    btnRow.innerHTML='<button onclick="closeModal()">確定</button>';
-  }else{
-    buttons.forEach(function(b){
-      var btn=document.createElement('button');
-      btn.textContent=b.text;
-      btn.className=b.cls||'';
-      btn.onclick=b.fn;
-      btnRow.appendChild(btn);
-    });
-  }
+  var btnRow=document.getElementById('modalBtns');btnRow.innerHTML='';
+  if(!buttons){btnRow.innerHTML='<button onclick="closeModal()">確定</button>';}
+  else{buttons.forEach(function(b){var btn=document.createElement('button');btn.textContent=b.text;btn.className=b.cls||'';btn.onclick=b.fn;btnRow.appendChild(btn);});}
   document.getElementById('modal').classList.add('show');
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
 
-// ===== SHOW ANSWER KEY =====
 function showAnswerKey(){
   var gridHtml='<div class="ans-grid">';
-  itemOrder.forEach(function(name){
-    var type=correctMap[name];
-    gridHtml+='<div class="ans-item '+tagCls[type]+'">'+
-      '<div class="ai-name">'+tagEmoji[type]+' '+name+'</div>'+
-      '<div class="ai-type">'+tagLabels[type]+'</div>'+
-      '</div>';
-  });
+  itemOrder.forEach(function(name){var type=correctMap[name];gridHtml+='<div class="ans-item '+tagCls[type]+'"><div class="ai-name">'+tagEmoji[type]+' '+name+'</div><div class="ai-type">'+tagLabels[type]+'</div></div>';});
   gridHtml+='</div>';
   showModal('📖','正確答案','以下是所有題目的正確分類：',null,gridHtml);
 }
@@ -680,14 +560,11 @@ async function submitAnswers(){
   if(hasSubmitted){showModal('ℹ️','已提交','你已經提交過答案了。');return;}
   var unanswered=sel.filter(function(s){return s===null;}).length;
   if(unanswered>0){showModal('⚠️','未完成','還有 '+unanswered+' 格未作答，請全部完成後再提交。');return;}
-
   var ok=0;var answers={};
   quizItems.forEach(function(item,i){answers[item.n]=sel[i];if(sel[i]===item.t)ok++;});
-
   var submitBtn=document.getElementById('submitBtn');
   submitBtn.disabled=true;submitBtn.textContent='📤 提交中...';
   document.getElementById('score').textContent='⏳ 正在儲存到雲端...';
-
   var isOverwrite=false;
   try{
     var existingDoc=await db.collection('submissions').doc(currentUser).get();
@@ -697,10 +574,8 @@ async function submitAnswers(){
   }catch(e){
     submitBtn.disabled=false;submitBtn.textContent='📤 提交答案';
     document.getElementById('score').textContent='';
-    showModal('❌','提交失敗','無法儲存到雲端，請檢查網路連線後重試。');
-    return;
+    showModal('❌','提交失敗','無法儲存到雲端，請檢查網路連線後重試。');return;
   }
-
   submitBtn.disabled=false;submitBtn.textContent='📤 提交答案';
   hasSubmitted=true;
   document.querySelectorAll('#grid .cell').forEach(function(cell,i){
@@ -722,45 +597,30 @@ function rstQuiz(){
   document.getElementById('score').textContent='';
 }
 
-// ===== ADMIN: RESET =====
+// ===== ADMIN =====
 function confirmReset(){
   showModal('⚠️','確認重設','確定要刪除所有學生的記錄嗎？此操作無法復原。',[
     {text:'取消',cls:'btn-cancel',fn:closeModal},
     {text:'確認刪除',cls:'btn-danger',fn:async function(){
       closeModal();
-      document.getElementById('statsRow').innerHTML=
-        '<div class="stat-card" style="flex:auto;width:100%"><div class="loading">刪除中</div></div>';
+      document.getElementById('statsRow').innerHTML='<div class="stat-card" style="flex:auto;width:100%"><div class="loading">刪除中</div></div>';
       document.getElementById('errorBars').innerHTML='<div class="loading">刪除中</div>';
       document.getElementById('studentTable').innerHTML='<div class="loading">刪除中</div>';
-      try{
-        await deleteAllSubmissions();
-        submissions=[];
-        renderAdminUI();
-        showModal('✅','已重設','所有學生記錄已被清除。');
-      }catch(e){
-        renderAdmin();
-        showModal('❌','刪除失敗','無法刪除雲端資料，請重試。');
-      }
+      try{await deleteAllSubmissions();submissions=[];renderAdminUI();showModal('✅','已重設','所有學生記錄已被清除。');}
+      catch(e){renderAdmin();showModal('❌','刪除失敗','無法刪除雲端資料，請重試。');}
     }}
   ]);
 }
 
-// ===== ADMIN: RENDER =====
 async function renderAdmin(){
-  document.getElementById('statsRow').innerHTML=
-    '<div class="stat-card" style="flex:auto;width:100%"><div class="loading">載入資料中</div></div>';
+  document.getElementById('statsRow').innerHTML='<div class="stat-card" style="flex:auto;width:100%"><div class="loading">載入資料中</div></div>';
   document.getElementById('errorBars').innerHTML='<div class="loading">載入中</div>';
   document.getElementById('studentTable').innerHTML='<div class="loading">載入中</div>';
-
-  try{
-    await loadSubmissions();
-  }catch(e){
+  try{await loadSubmissions();}catch(e){
     document.getElementById('statsRow').innerHTML='';
     document.getElementById('errorBars').innerHTML='<div class="empty-msg">⚠️ 載入失敗，請檢查網路連線後重試</div>';
-    document.getElementById('studentTable').innerHTML='<div class="empty-msg">⚠️ 載入失敗</div>';
-    return;
+    document.getElementById('studentTable').innerHTML='<div class="empty-msg">⚠️ 載入失敗</div>';return;
   }
-
   renderAdminUI();
 }
 
@@ -769,123 +629,53 @@ function renderAdminUI(){
   var avgScore=total?submissions.reduce(function(s,r){return s+r.score;},0)/total:0;
   var perfect=submissions.filter(function(r){return r.score===9;}).length;
   var lowest=total?Math.min.apply(null,submissions.map(function(r){return r.score;})):'-';
-
   document.getElementById('statsRow').innerHTML=
     '<div class="stat-card"><div class="num">'+total+'</div><div class="label">提交人數</div></div>'+
     '<div class="stat-card"><div class="num y">'+avgScore.toFixed(1)+'</div><div class="label">平均分 / 9</div></div>'+
     '<div class="stat-card"><div class="num g">'+perfect+'</div><div class="label">滿分人數</div></div>'+
     '<div class="stat-card"><div class="num r">'+lowest+'</div><div class="label">最低分</div></div>';
-
   if(total===0){
     document.getElementById('errorBars').innerHTML='<div class="empty-msg">暫無提交記錄</div>';
-    document.getElementById('studentTable').innerHTML='<div class="empty-msg">暫無提交記錄</div>';
-    return;
+    document.getElementById('studentTable').innerHTML='<div class="empty-msg">暫無提交記錄</div>';return;
   }
-
   var errors={};var wrongChoices={};
   itemOrder.forEach(function(name){errors[name]=0;wrongChoices[name]={};});
-  submissions.forEach(function(r){
-    itemOrder.forEach(function(name){
-      if(r.answers[name]!==correctMap[name]){
-        errors[name]++;
-        var wc=tagLabels[r.answers[name]];
-        wrongChoices[name][wc]=(wrongChoices[name][wc]||0)+1;
-      }
-    });
-  });
-
+  submissions.forEach(function(r){itemOrder.forEach(function(name){if(r.answers[name]!==correctMap[name]){errors[name]++;var wc=tagLabels[r.answers[name]];wrongChoices[name][wc]=(wrongChoices[name][wc]||0)+1;}});});
   var sorted=itemOrder.slice().sort(function(a,b){return errors[b]-errors[a];});
   var barsHtml='';
   sorted.forEach(function(name){
     var cnt=errors[name];var pct=total?(cnt/total*100):0;
     var color=pct>=50?'#ef5350':pct>=25?'#ffa726':'#66bb6a';
     var wrongDetail='';
-    if(cnt>0){
-      var wcs=Object.keys(wrongChoices[name]).sort(function(a,b){return wrongChoices[name][b]-wrongChoices[name][a];});
-      wrongDetail='多數誤選：'+wcs.map(function(w){return w+'('+wrongChoices[name][w]+'人)';}).join('、');
-    }
-    barsHtml+='<div class="ebar">'+
-      '<div class="ebar-top"><span><span class="ename">'+name+'</span> <span class="etype">（正確：'+tagLabels[correctMap[name]]+'）</span></span><span class="epct">'+cnt+'人答錯 ('+pct.toFixed(0)+'%)</span></div>'+
-      '<div class="ebar-bg"><div class="ebar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
-      (wrongDetail?'<div class="ebar-note">'+wrongDetail+'</div>':'')+
-      '</div>';
+    if(cnt>0){var wcs=Object.keys(wrongChoices[name]).sort(function(a,b){return wrongChoices[name][b]-wrongChoices[name][a];});wrongDetail='多數誤選：'+wcs.map(function(w){return w+'('+wrongChoices[name][w]+'人)';}).join('、');}
+    barsHtml+='<div class="ebar"><div class="ebar-top"><span><span class="ename">'+name+'</span> <span class="etype">（正確：'+tagLabels[correctMap[name]]+'）</span></span><span class="epct">'+cnt+'人答錯 ('+pct.toFixed(0)+'%)</span></div><div class="ebar-bg"><div class="ebar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+(wrongDetail?'<div class="ebar-note">'+wrongDetail+'</div>':'')+'</div>';
   });
-
   var worstItem=sorted[0];
-  if(errors[worstItem]>0){
-    var topWrong=Object.keys(wrongChoices[worstItem]).sort(function(a,b){return wrongChoices[worstItem][b]-wrongChoices[worstItem][a];})[0];
-    barsHtml+='<div class="teach-tip">💡 <b>教學建議：</b>學生最容易將「'+worstItem+'」誤判為「'+topWrong+'」（共'+errors[worstItem]+'人答錯，佔'+Math.round(errors[worstItem]/total*100)+'%）。建議加強講解「'+tagLabels[correctMap[worstItem]]+'」的定義與特徵，並與「'+topWrong+'」作比較。</div>';
-  }
+  if(errors[worstItem]>0){var topWrong=Object.keys(wrongChoices[worstItem]).sort(function(a,b){return wrongChoices[worstItem][b]-wrongChoices[worstItem][a];})[0];barsHtml+='<div class="teach-tip">💡 <b>教學建議：</b>學生最容易將「'+worstItem+'」誤判為「'+topWrong+'」（共'+errors[worstItem]+'人答錯，佔'+Math.round(errors[worstItem]/total*100)+'%）。建議加強講解「'+tagLabels[correctMap[worstItem]]+'」的定義與特徵，並與「'+topWrong+'」作比較。</div>';}
   document.getElementById('errorBars').innerHTML=barsHtml;
-
   renderStudentTable(errors);
 }
 
 function renderStudentTable(errors){
   var total=submissions.length;
   if(!total){document.getElementById('studentTable').innerHTML='<div class="empty-msg">暫無提交記錄</div>';return;}
-
   var sorted=submissions.slice();
-  sorted.sort(function(a,b){
-    var va,vb;
-    if(sortCol==='name'){va=a.name;vb=b.name;return sortDir*(va<vb?-1:va>vb?1:0);}
-    if(sortCol==='score'){va=a.score;vb=b.score;return sortDir*(va-vb);}
-    if(sortCol==='#'){return 0;}
-    var ca=a.answers[sortCol]===correctMap[sortCol]?1:0;
-    var cb=b.answers[sortCol]===correctMap[sortCol]?1:0;
-    return sortDir*(ca-cb);
-  });
-
+  sorted.sort(function(a,b){var va,vb;if(sortCol==='name'){va=a.name;vb=b.name;return sortDir*(va<vb?-1:va>vb?1:0);}if(sortCol==='score'){va=a.score;vb=b.score;return sortDir*(va-vb);}if(sortCol==='#'){return 0;}var ca=a.answers[sortCol]===correctMap[sortCol]?1:0;var cb=b.answers[sortCol]===correctMap[sortCol]?1:0;return sortDir*(ca-cb);});
   var cols=['#','name'].concat(itemOrder).concat(['score']);
   var colLabels={'#':'#','name':'學生','score':'分數'};
   itemOrder.forEach(function(n){colLabels[n]=n;});
-
-  var arrow=function(col){
-    var isActive=sortCol===col;
-    var symbol=isActive?(sortDir===1?' ↑':' ↓'):' ↕';
-    return '<span class="sort-arrow">'+symbol+'</span>';
-  };
-
+  var arrow=function(col){var isActive=sortCol===col;var symbol=isActive?(sortDir===1?' ↑':' ↓'):' ↕';return '<span class="sort-arrow">'+symbol+'</span>';};
   var th='<table><thead><tr>';
-  cols.forEach(function(col){
-    var cls=sortCol===col?' class="sort-active"':'';
-    th+='<th'+cls+' data-col="'+col+'">'+colLabels[col]+arrow(col)+'</th>';
-  });
+  cols.forEach(function(col){var cls=sortCol===col?' class="sort-active"':'';th+='<th'+cls+' data-col="'+col+'">'+colLabels[col]+arrow(col)+'</th>';});
   th+='</tr></thead><tbody>';
-
   var rows='';
-  sorted.forEach(function(r,idx){
-    rows+='<tr><td>'+(idx+1)+'</td><td class="td-name">'+r.name+'</td>';
-    itemOrder.forEach(function(name){
-      var ans=r.answers[name];var correct=correctMap[name];
-      if(ans===correct){rows+='<td class="td-ok">✓</td>';}
-      else{rows+='<td class="td-no">✗ '+tagLabels[ans]+'</td>';}
-    });
-    rows+='<td class="td-score">'+r.score+'/9</td></tr>';
-  });
-
-  if(!errors){
-    errors={};
-    itemOrder.forEach(function(name){errors[name]=0;});
-    submissions.forEach(function(r){
-      itemOrder.forEach(function(name){if(r.answers[name]!==correctMap[name])errors[name]++;});
-    });
-  }
-
+  sorted.forEach(function(r,idx){rows+='<tr><td>'+(idx+1)+'</td><td class="td-name">'+r.name+'</td>';itemOrder.forEach(function(name){var ans=r.answers[name];var correct=correctMap[name];if(ans===correct){rows+='<td class="td-ok">✓</td>';}else{rows+='<td class="td-no">✗ '+tagLabels[ans]+'</td>';}});rows+='<td class="td-score">'+r.score+'/9</td></tr>';});
+  if(!errors){errors={};itemOrder.forEach(function(name){errors[name]=0;});submissions.forEach(function(r){itemOrder.forEach(function(name){if(r.answers[name]!==correctMap[name])errors[name]++;});});}
   var foot='<tr class="tfoot"><td></td><td>答錯人數</td>';
   itemOrder.forEach(function(name){foot+='<td>'+errors[name]+'</td>';});
   foot+='<td></td></tr>';
-
   document.getElementById('studentTable').innerHTML=th+rows+'</tbody><tfoot>'+foot+'</tfoot></table>';
-
-  document.querySelectorAll('#studentTable th').forEach(function(thEl){
-    thEl.addEventListener('click',function(){
-      var col=thEl.dataset.col;
-      if(col==='#')return;
-      if(sortCol===col){sortDir*=-1;}else{sortCol=col;sortDir=col==='score'?-1:1;}
-      renderStudentTable();
-    });
-  });
+  document.querySelectorAll('#studentTable th').forEach(function(thEl){thEl.addEventListener('click',function(){var col=thEl.dataset.col;if(col==='#')return;if(sortCol===col){sortDir*=-1;}else{sortCol=col;sortDir=col==='score'?-1:1;}renderStudentTable();});});
 }
 </script>
 </body>
