@@ -226,13 +226,13 @@ var ADMIN_PW='lsy617';
 // ===== CORRECT ANSWERS =====
 var correctMap={
   '水壩':'mass','石墩':'mass','水馬':'mass',
-  '電塔':'frame','棚架':'frame','太空館':'shell',
+  '電塔':'frame','棚架':'frame','香港太空館':'shell',
   '隧道':'shell','碗':'shell','安全帽':'shell'
 };
 var tagLabels={mass:'質量結構',frame:'支架結構',shell:'殼形結構'};
 var tagEmoji={mass:'🔴',frame:'🔵',shell:'🟢'};
 var tagCls={mass:'am',frame:'af',shell:'as'};
-var itemOrder=['水壩','石墩','水馬','電塔','棚架','太空館','隧道','碗','安全帽'];
+var itemOrder=['水壩','石墩','水馬','電塔','棚架','香港太空館','隧道','碗','安全帽'];
 
 // ===== SUBMISSIONS (loaded from Firestore) =====
 var submissions=[];
@@ -277,21 +277,116 @@ function drawDam(c){
   for(var x=5;x<32;x+=10){c.moveTo(x,50);c.quadraticCurveTo(x+3,46,x+6,50);}c.stroke();
 }
 
-// --- 石墩 (Mass) ---
+// --- 石墩 (Mass) - Based on real concrete bollard photo ---
 function drawStoneBollard(c){
-  c.fillStyle='#9e9e9e';
-  c.beginPath();c.moveTo(30,28);c.lineTo(28,72);c.lineTo(72,72);c.lineTo(70,28);c.closePath();c.fill();
-  c.strokeStyle='#757575';c.lineWidth=2;c.stroke();
-  c.beginPath();c.arc(50,28,21,Math.PI,0);c.fillStyle='#bdbdbd';c.fill();
-  c.strokeStyle='#757575';c.lineWidth=2;c.stroke();
-  c.beginPath();c.ellipse(50,28,21,6,0,0,Math.PI*2);c.fillStyle='#c0c0c0';c.fill();
-  c.strokeStyle='#757575';c.lineWidth=1.5;c.stroke();
-  c.fillStyle='#888';c.beginPath();c.moveTo(22,72);c.lineTo(20,82);c.lineTo(80,82);c.lineTo(78,72);c.closePath();c.fill();
-  c.strokeStyle='#666';c.lineWidth=2;c.stroke();
-  c.strokeStyle='#aaa';c.lineWidth=1;
-  c.beginPath();c.moveTo(32,42);c.lineTo(68,42);c.stroke();
-  c.beginPath();c.moveTo(30,56);c.lineTo(70,56);c.stroke();
-  c.fillStyle='#795548';c.fillRect(5,82,90,4);
+  // Ground / shadow
+  c.fillStyle='#555';
+  c.beginPath();
+  c.ellipse(50,86,38,5,0,0,Math.PI*2);
+  c.fill();
+
+  // Front face - trapezoid shape (wider at bottom, narrower at top)
+  var topL=30, topR=70, topY=28;
+  var botL=18, botR=82, botY=84;
+
+  // Right side face (3D perspective)
+  c.beginPath();
+  c.moveTo(topR,topY);
+  c.lineTo(topR+8,topY-6);
+  c.lineTo(botR+4,botY-4);
+  c.lineTo(botR,botY);
+  c.closePath();
+  c.fillStyle='#8a8a8a';
+  c.fill();
+  c.strokeStyle='#6a6a6a';c.lineWidth=1.2;c.stroke();
+
+  // Top face (3D perspective)
+  c.beginPath();
+  c.moveTo(topL,topY);
+  c.lineTo(topL+6,topY-7);
+  c.lineTo(topR+8,topY-6);
+  c.lineTo(topR,topY);
+  c.closePath();
+  c.fillStyle='#b8b8b8';
+  c.fill();
+  c.strokeStyle='#8a8a8a';c.lineWidth=1.2;c.stroke();
+
+  // Main front face - trapezoid
+  c.beginPath();
+  c.moveTo(topL,topY);
+  c.lineTo(topR,topY);
+  c.lineTo(botR,botY);
+  c.lineTo(botL,botY);
+  c.closePath();
+
+  // Concrete gradient
+  var grad=c.createLinearGradient(0,topY,0,botY);
+  grad.addColorStop(0,'#b0b0b0');
+  grad.addColorStop(0.3,'#a8a8a8');
+  grad.addColorStop(0.7,'#959595');
+  grad.addColorStop(1,'#888888');
+  c.fillStyle=grad;
+  c.fill();
+  c.strokeStyle='#6e6e6e';c.lineWidth=2;c.stroke();
+
+  // Concrete texture - subtle speckles
+  c.fillStyle='rgba(0,0,0,0.05)';
+  var rng=function(s){return function(){s=(s*9301+49297)%233280;return s/233280;}};
+  var rand=rng(42);
+  for(var i=0;i<40;i++){
+    var px=botL+4+rand()*(botR-botL-8);
+    var py=topY+4+rand()*(botY-topY-8);
+    // Check if point is inside trapezoid roughly
+    var frac=(py-topY)/(botY-topY);
+    var lx=topL+(botL-topL)*frac;
+    var rx=topR+(botR-topR)*frac;
+    if(px>lx+3 && px<rx-3){
+      c.beginPath();
+      c.arc(px,py,rand()*1.5+0.5,0,Math.PI*2);
+      c.fill();
+    }
+  }
+
+  // Darker patches for concrete look
+  c.fillStyle='rgba(0,0,0,0.04)';
+  c.beginPath();c.ellipse(42,55,12,8,0.2,0,Math.PI*2);c.fill();
+  c.beginPath();c.ellipse(62,68,10,6,-0.1,0,Math.PI*2);c.fill();
+
+  // Circular hole in center
+  var holeX=50, holeY=58, holeR=7;
+  // Hole shadow
+  c.beginPath();
+  c.arc(holeX,holeY,holeR+1,0,Math.PI*2);
+  c.fillStyle='rgba(0,0,0,0.15)';
+  c.fill();
+  // Hole
+  c.beginPath();
+  c.arc(holeX,holeY,holeR,0,Math.PI*2);
+  c.fillStyle='#3a3a3a';
+  c.fill();
+  // Hole inner ring
+  c.beginPath();
+  c.arc(holeX,holeY,holeR,0,Math.PI*2);
+  c.strokeStyle='#555';c.lineWidth=1.5;c.stroke();
+  // Hole depth highlight
+  c.beginPath();
+  c.arc(holeX+1,holeY-1,holeR-2,0,Math.PI*2);
+  c.fillStyle='rgba(255,255,255,0.06)';
+  c.fill();
+
+  // Edge highlight on front face (top-left)
+  c.strokeStyle='rgba(255,255,255,0.2)';c.lineWidth=1.5;
+  c.beginPath();
+  c.moveTo(topL+2,topY+2);
+  c.lineTo(topR-2,topY+2);
+  c.stroke();
+
+  // Bottom edge line
+  c.strokeStyle='rgba(0,0,0,0.15)';c.lineWidth=1.5;
+  c.beginPath();
+  c.moveTo(botL+2,botY-1);
+  c.lineTo(botR-2,botY-1);
+  c.stroke();
 }
 
 // --- 水馬 (Mass) ---
@@ -357,11 +452,9 @@ function drawScaffolding(c){
   });
 }
 
-// --- 太空館 (Shell) - 白色半球形建築，只有圓頂 ---
+// --- 香港太空館 (Shell) ---
 function drawSpaceMuseum(c){
   var cx=50, cy=72, r=40;
-
-  // Dome body - white with subtle gradient
   c.beginPath();
   c.arc(cx,cy,r,Math.PI,0);
   c.closePath();
@@ -375,15 +468,11 @@ function drawSpaceMuseum(c){
   c.fill();
   c.strokeStyle='#b0b0b0';c.lineWidth=2;
   c.stroke();
-
-  // Dome highlight (top-left shine)
   c.beginPath();
   c.arc(cx-12,cy-16,16,Math.PI*1.15,Math.PI*1.85);
   c.strokeStyle='rgba(255,255,255,0.95)';
   c.lineWidth=3.5;
   c.stroke();
-
-  // Dome panel lines (vertical meridians) - subtle
   c.strokeStyle='rgba(0,0,0,0.07)';c.lineWidth=0.8;
   for(var a=-3;a<=3;a++){
     var angle=a*0.22;
@@ -395,8 +484,6 @@ function drawSpaceMuseum(c){
     }
     c.stroke();
   }
-
-  // Dome horizontal rings
   c.strokeStyle='rgba(0,0,0,0.06)';c.lineWidth=0.8;
   for(var ring=10;ring<=34;ring+=8){
     var ringW=Math.sqrt(r*r-ring*ring);
@@ -404,12 +491,8 @@ function drawSpaceMuseum(c){
     c.ellipse(cx,cy-ring,ringW,ringW*0.12,0,Math.PI,0);
     c.stroke();
   }
-
-  // Dome base rim
   c.fillStyle='#bbb';
   c.fillRect(cx-r,cy-1,r*2,3);
-
-  // Small top cap
   c.fillStyle='#ddd';
   c.beginPath();
   c.arc(cx,cy-r+1,3.5,0,Math.PI*2);
@@ -464,7 +547,7 @@ var drawFns={
   '水馬':drawWaterBarrier,
   '電塔':drawPylon,
   '棚架':drawScaffolding,
-  '太空館':drawSpaceMuseum,
+  '香港太空館':drawSpaceMuseum,
   '隧道':drawTunnel,
   '碗':drawBowl,
   '安全帽':drawHelmet
